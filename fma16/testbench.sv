@@ -56,7 +56,7 @@ module tb_fma16;
 	if (testvectors[vectornum] === 'x) begin 
            $fdisplay(handle3, "%d tests completed with %d errors", 
 	             vectornum, errors);
-           $stop;
+           $finish;
 	end
      end
 endmodule

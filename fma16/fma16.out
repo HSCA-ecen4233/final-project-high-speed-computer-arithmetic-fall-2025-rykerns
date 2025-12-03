@@ -1,9 +1,1 @@
-Error: inputs 3c00 * 3c00 + 0000
-  result = xxxx (3c00 expected) flags = xxxx (0000 expected)
-Error: inputs 3c00 * 3e00 + 0000
-  result = xxxx (3e00 expected) flags = xxxx (0000 expected)
-Error: inputs 3e00 * 3c00 + 0000
-  result = xxxx (3e00 expected) flags = xxxx (0000 expected)
-Error: inputs 3e00 * 3e00 + 0000
-  result = xxxx (4080 expected) flags = xxxx (0000 expected)
-         4 tests completed with          4 errors
+         4 tests completed with          0 errors
