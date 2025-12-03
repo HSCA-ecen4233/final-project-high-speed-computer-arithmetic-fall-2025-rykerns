@@ -1,3 +1,6 @@
+//fmul tests completed 0-2
+//fadd_1 test completed
+
 // fma16.sv
 // David_Harris@hmc.edu 26 February 2022
 
@@ -55,6 +58,8 @@ always_comb begin
 	Zm = z[9:0];
 end
 
+//====== fmul stuff =====
+
 //need significands with hidden 1 for normalized nbumbers
 assign Xsig = {1'b1, Xm};
 assign Ysig = {1'b1, Ym};
@@ -91,15 +96,70 @@ assign Re = exp_norm[4:0];
 assign Rf = Rm[9:0];
 
 //16 bit result: p=x*y when mul=1, else p=x, return p
+logic [15:0] p_mul;
+
+//fmul results
+assign p_mul = {Ps,Re,Rf};
+
+// ====== fadd stuff ======
+//we ant to implement result = x + z; add and normalize
+logic [15:0] p_add;
+
+logic As;
+
+//build significands with hiddeen 1
+		logic [10:0] Xsigadd, Zsigadd;
+		logic [11:0] sumsig;
+		logic [10:0] Am;
+		logic [4:0] Ae;
+		logic [9:0] Af;
+
+always_comb begin
+	//default pass
+	p_add=x;
+
+	//fadd 0 is exponent of zero, significand of 1.0 and 1.1 Rz
+	//mul=0; add=1, no negation and same sign + exp
+	if (!mul && add && (negr==1'b0)&& (negz==1'b0)&& (Xs==Zs)&& (Xe==Ze)) begin
+		//sign is the same (Xs=Zs=0)
+		As = Xs;
+
+		Xsigadd={1'b1, Xm};
+		Zsigadd={1'b1, Zm};
+
+		sumsig  = {1'b0, Xsigadd} + {1'b0, Zsigadd};
+
+		//normalize: if sumsig[11] is 1 then its overflowed past 2
+		if (sumsig[11]==1'b1) begin
+			Am=sumsig[11:1]; //shift right by 1
+			Ae=Xe+5'd1;
+		end else begin
+			Am=sumsig[10:0];
+			Ae=Xe;
+		end
+		Af=Am[9:0];
+		p_add={As, Ae, Af};
+
+	end	
+
+end
+
+//=====top level select=====
+
 logic [15:0] p;
 
 always_comb begin
+	//default pass
+	p=x;
+
 	if (mul) begin
-		p={Ps,Re,Rf};
-	end else begin
-		p=x;
+		p=p_mul;
+	end else if (add) begin
+		p=p_add;
 	end
+
 	result=p;
+
 end
 
 //first milestone all flags 0
