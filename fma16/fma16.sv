@@ -1,10 +1,11 @@
 // ==== DISCLAIMER ====
-// For the sake of transparency, generative AI was used to help me clean up some parts of the code and help debug some problems I had. -Ryan
+// For the sake of transparency, some generative AI was used to help me clean up some parts of the code and help debug some problems I had. -Ryan
 // Other specific things I had it help me with:
 /*
  - fadd: The case block; formatting
  - fadd: the guard|round|sticky block near the end
  - had help figuring out a difficulty with an old fadd2 solution; old solution only considered Xs==Zs, but A and B must be picked based on Exp and mantissa too; helped application of negr/negz
+ - how to start with the fma stuff for milestone 3; idea to embed the mult block in the add block
 */
 
 //fmul tests completed 0-2
@@ -134,6 +135,10 @@ logic [14:0] DiffExt_add;
 logic [13:0] SubMag_add;
 logic [3:0] sh_add;
 logic signX_eff, signZ_eff;
+logic [4:0] Xexp_add;
+logic [9:0] Xfrac_add;
+logic [10:0] Xsig_src;
+logic Xs_src;
 
 
 
@@ -144,28 +149,39 @@ always_comb begin
 
 	//handle add, no negation, same sign (fadd_0 / fadd_1)
 	if (add) begin
-		//check effective signs of input (for implementation of negr/negz)
-		signX_eff = Xs ^ negr;
+		// in pure add mode (mul=0) : use x -> we pass on the mul block
+		//in fma mode (mul=1) : use product x*y -> use the mul block as well
+		if (mul) begin
+			//use the normalized product stuff (Rm/Re/Ps) as the "new" X
+			Xexp_add = Re;
+			Xfrac_add = Rm[9:0];
+			Xsig_src = Rm;
+			Xs_src = Ps; // sign of product
+		end else begin
+			//use the original x as X
+			Xexp_add = Xe;
+			Xfrac_add = Xm;
+			Xsig_src = {1'b1, Xm};
+			Xs_src = Xs;
+		end
+
+		signX_eff = Xs_src ^ negr; //negate product
 		signZ_eff = Zs ^ negz;
 
-		//choose operands, where A is larger, compare exponents then the mantissa
-
-		if ((Xe > Ze) || ((Xe==Ze) && Xm>=Zm)) begin
-			//A=X, B=Z
-			Ae_add = Xe;
-			Asig_add = {1'b1, Xm};
+		if ((Xexp_add > Ze) || ((Xexp_add == Ze) && (Xfrac_add >=Zm))) begin
+			Ae_add = Xexp_add;
+			Asig_add = Xsig_src;
 			Be_add = Ze;
 			Bsig_add = {1'b1, Zm};
-			signA_add=signX_eff;
-			signB_add=signZ_eff;
+			signA_add = signX_eff;
+			signB_add = signZ_eff;
 		end else begin
-			//A=Z, B=X
 			Ae_add = Ze;
 			Asig_add = {1'b1, Zm};
-			Be_add = Xe;
-			Bsig_add = {1'b1, Xm};
-			signA_add=signZ_eff;
-			signB_add=signX_eff;
+			Be_add = Xexp_add;
+			Bsig_add = Xsig_src;
+			signA_add = signZ_eff;
+			signB_add = signX_eff;
 		end
 
 		//extend significands with 3 low bits for guard/round/sticky
@@ -176,7 +192,7 @@ always_comb begin
 		dexp_add = Ae_add - Be_add;
 
 
-		// Align B to A with sticky (no variable part-selects)
+		// Align B to A with sticky
         case (dexp_add)
             5'd0: begin
                 Baligned_add = Bext_add;
@@ -346,18 +362,20 @@ always_comb begin
 	p = x;
 	flags_next = 4'b0000;
 
-	if (mul) begin
-		// multiply path (fmul_0/1/2)
+	if (mul && add) begin
+		//fma: (+-X*Y) +-Z (product x*y fed into adder with z)
+		p = p_add;
+		flags_next = {3'b000, NX_add};
+	end else if (mul) begin
 		p = p_mul;
 		flags_next = 4'b0000;
 	end else if (add) begin
-		// add path (fadd_0 / fadd_1 so far)
-		p = p_add;
-		flags_next = {3'b000, NX_add};  //NX in bit[0]
+		p=p_add;
+		flags_next = {3'b000, NX_add};
 	end
 
 	result = p;
-	flags  = flags_next;
+	flags = flags_next;
 end
 
 
