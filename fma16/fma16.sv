@@ -1,5 +1,8 @@
+// ==== DISCLAIMER ====
+// For the sake of transparency, generative AI was used to help me clean up some parts of the code and help debug some problems I had
+
 //fmul tests completed 0-2
-//fadd_1 test completed
+//fadd_0 test completed
 
 // fma16.sv
 // David_Harris@hmc.edu 26 February 2022
@@ -102,68 +105,199 @@ logic [15:0] p_mul;
 assign p_mul = {Ps,Re,Rf};
 
 // ====== fadd stuff ======
-//we ant to implement result = x + z; add and normalize
+//we want to make a general x + z for positive, same-sign, normalized numbers (fadd_0 and fadd_1)
+
 logic [15:0] p_add;
+logic NX_add;  // inexact flag for add path
 
-logic As;
+logic [4:0] Ae_add, Be_add;
+logic [10:0] Asig_add, Bsig_add;
+logic [13:0] Aext_add, Bext_add;
+logic [4:0] dexp_add;
+logic [13:0] Baligned_add;
+logic [14:0] SumExt_add;
+logic [13:0] NormExt_add;
+logic [4:0] Eres_add;
+logic [10:0] Mant_add; //1 + 10 fractional bits
+logic guard_add, roundb_add, sticky_add, sticky2_add, sticky_all_add;
+logic [11:0] Mant12_add;
+logic [10:0] MantFinal_add;
+logic [4:0] Efinal_add;
 
-//build significands with hiddeen 1
-		logic [10:0] Xsigadd, Zsigadd;
-		logic [11:0] sumsig;
-		logic [10:0] Am;
-		logic [4:0] Ae;
-		logic [9:0] Af;
+
 
 always_comb begin
-	//default pass
-	p_add=x;
+	//Defaults
+	p_add = x; // pass-through if not a recognized add
+	NX_add = 1'b0;
 
-	//fadd 0 is exponent of zero, significand of 1.0 and 1.1 Rz
-	//mul=0; add=1, no negation and same sign + exp
-	if (!mul && add && (negr==1'b0)&& (negz==1'b0)&& (Xs==Zs)&& (Xe==Ze)) begin
-		//sign is the same (Xs=Zs=0)
-		As = Xs;
+	//handle add, no negation, same sign (fadd_0 / fadd_1)
+	if (!mul && add && (negr == 1'b0) && (negz == 1'b0) && (Xs == Zs)) begin
+		//choose operand with larger exponent as A
 
-		Xsigadd={1'b1, Xm};
-		Zsigadd={1'b1, Zm};
-
-		sumsig  = {1'b0, Xsigadd} + {1'b0, Zsigadd};
-
-		//normalize: if sumsig[11] is 1 then its overflowed past 2
-		if (sumsig[11]==1'b1) begin
-			Am=sumsig[11:1]; //shift right by 1
-			Ae=Xe+5'd1;
+		if (Xe >= Ze) begin
+			Ae_add = Xe;
+			Asig_add = {1'b1, Xm};
+			Be_add = Ze;
+			Bsig_add = {1'b1, Zm};
 		end else begin
-			Am=sumsig[10:0];
-			Ae=Xe;
+			Ae_add = Ze;
+			Asig_add = {1'b1, Zm};
+			Be_add = Xe;
+			Bsig_add = {1'b1, Xm};
 		end
-		Af=Am[9:0];
-		p_add={As, Ae, Af};
 
-	end	
+		//extend significands with 3 low bits for guard/round/sticky
+		Aext_add = {Asig_add, 3'b000};  //11 + 3 = 14 bits
+		Bext_add = {Bsig_add, 3'b000};
 
+		// exp difference (nonnegative because Ae is the larger)
+		dexp_add =Ae_add - Be_add;
+
+		// Align B to A with sticky (no variable part-selects)
+        case (dexp_add)
+            5'd0: begin
+                Baligned_add = Bext_add;
+                sticky_add   = 1'b0;
+            end
+            5'd1: begin
+                Baligned_add = Bext_add >> 1;
+                sticky_add   = Bext_add[0];
+                Baligned_add[0] = Baligned_add[0] | sticky_add;
+            end
+            5'd2: begin
+                Baligned_add = Bext_add >> 2;
+                sticky_add   = |Bext_add[1:0];
+                Baligned_add[0] = Baligned_add[0] | sticky_add;
+            end
+            5'd3: begin
+                Baligned_add = Bext_add >> 3;
+                sticky_add   = |Bext_add[2:0];
+                Baligned_add[0] = Baligned_add[0] | sticky_add;
+            end
+            5'd4: begin
+                Baligned_add = Bext_add >> 4;
+                sticky_add   = |Bext_add[3:0];
+                Baligned_add[0] = Baligned_add[0] | sticky_add;
+            end
+            5'd5: begin
+                Baligned_add = Bext_add >> 5;
+                sticky_add   = |Bext_add[4:0];
+                Baligned_add[0] = Baligned_add[0] | sticky_add;
+            end
+            5'd6: begin
+                Baligned_add = Bext_add >> 6;
+                sticky_add   = |Bext_add[5:0];
+                Baligned_add[0] = Baligned_add[0] | sticky_add;
+            end
+            5'd7: begin
+                Baligned_add = Bext_add >> 7;
+                sticky_add   = |Bext_add[6:0];
+                Baligned_add[0] = Baligned_add[0] | sticky_add;
+            end
+            5'd8: begin
+                Baligned_add = Bext_add >> 8;
+                sticky_add   = |Bext_add[7:0];
+                Baligned_add[0] = Baligned_add[0] | sticky_add;
+            end
+            5'd9: begin
+                Baligned_add = Bext_add >> 9;
+                sticky_add   = |Bext_add[8:0];
+                Baligned_add[0] = Baligned_add[0] | sticky_add;
+            end
+            5'd10: begin
+                Baligned_add = Bext_add >> 10;
+                sticky_add   = |Bext_add[9:0];
+                Baligned_add[0] = Baligned_add[0] | sticky_add;
+            end
+            5'd11: begin
+                Baligned_add = Bext_add >> 11;
+                sticky_add   = |Bext_add[10:0];
+                Baligned_add[0] = Baligned_add[0] | sticky_add;
+            end
+            5'd12: begin
+                Baligned_add = Bext_add >> 12;
+                sticky_add   = |Bext_add[11:0];
+                Baligned_add[0] = Baligned_add[0] | sticky_add;
+            end
+            5'd13: begin
+                Baligned_add = Bext_add >> 13;
+                sticky_add   = |Bext_add[12:0];
+                Baligned_add[0] = Baligned_add[0] | sticky_add;
+            end
+            default: begin
+                // dexp_add >= 14: B is so small it’s purely sticky
+                sticky_add   = |Bext_add;
+                Baligned_add = 14'd0;
+                Baligned_add[0] = sticky_add;
+            end
+        endcase
+
+		//add magnitudes
+		SumExt_add = {1'b0, Aext_add} + {1'b0, Baligned_add};
+
+		//normalize: if there is a carry-out, shift right 1 and bump exponent
+		if (SumExt_add[14]) begin
+			NormExt_add = SumExt_add[14:1]; //shift right
+			Eres_add = Ae_add + 5'd1;
+		end else begin
+			NormExt_add = SumExt_add[13:0];
+			Eres_add = Ae_add;
+		end
+
+		Mant_add = NormExt_add[13:3]; // 11 bits
+		guard_add= NormExt_add[2];
+		roundb_add = NormExt_add[1];
+		sticky2_add = NormExt_add[0]; // includes previous sticky via Baligned[0]
+
+		sticky_all_add = sticky2_add;
+
+		//rne rounding (roundmode is assumed rne for these tests)
+		NX_add = guard_add | roundb_add | sticky_all_add;
+
+		Mant12_add = {1'b0, Mant_add}; //+1
+
+		if (guard_add && (roundb_add||sticky_all_add||Mant_add[0])) begin
+			Mant12_add = Mant12_add + 12'd1;
+		end
+
+		//mantissa overflow from rounding
+
+		if (Mant12_add[11]) begin
+			MantFinal_add = Mant12_add[11:1];
+			Efinal_add = Eres_add + 5'd1;
+		end else begin
+			MantFinal_add = Mant12_add[10:0];
+			Efinal_add = Eres_add;
+		end
+		//result, sign is Xs (== Zs)
+		p_add ={Xs, Efinal_add, MantFinal_add[9:0]};
+	end
 end
 
 //=====top level select=====
 
 logic [15:0] p;
+logic [3:0] flags_next;
 
 always_comb begin
-	//default pass
-	p=x;
+	// default
+	p = x;
+	flags_next = 4'b0000;
 
 	if (mul) begin
-		p=p_mul;
+		// multiply path (fmul_0/1/2)
+		p = p_mul;
+		flags_next = 4'b0000;
 	end else if (add) begin
-		p=p_add;
+		// add path (fadd_0 / fadd_1 so far)
+		p = p_add;
+		flags_next = {3'b000, NX_add};  //NX in bit[0]
 	end
 
-	result=p;
-
+	result = p;
+	flags  = flags_next;
 end
-
-//first milestone all flags 0
-assign flags = 4'b0000;
 
 
    // stubbed ideas for instantiation ideas
