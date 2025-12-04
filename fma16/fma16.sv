@@ -1,5 +1,10 @@
 // ==== DISCLAIMER ====
-// For the sake of transparency, generative AI was used to help me clean up some parts of the code and help debug some problems I had
+// For the sake of transparency, generative AI was used to help me clean up some parts of the code and help debug some problems I had.
+//Specific things I had it help me with:
+/*
+ - fadd: The case block; formatting
+ - fadd: the guard|round|sticky block near the end
+*/
 
 //fmul tests completed 0-2
 //fadd_0 test completed
@@ -245,31 +250,19 @@ always_comb begin
 			Eres_add = Ae_add;
 		end
 
-		Mant_add = NormExt_add[13:3]; // 11 bits
+		Mant_add = NormExt_add[13:3]; // 11 bits = 1 +10 frac
 		guard_add= NormExt_add[2];
 		roundb_add = NormExt_add[1];
-		sticky2_add = NormExt_add[0]; // includes previous sticky via Baligned[0]
+		sticky2_add = NormExt_add[0]; //includes previous sticky via Baligned[0]
 
 		sticky_all_add = sticky2_add;
 
 		//rne rounding (roundmode is assumed rne for these tests)
 		NX_add = guard_add | roundb_add | sticky_all_add;
 
-		Mant12_add = {1'b0, Mant_add}; //+1
+		MantFinal_add = Mant_add;
+		Efinal_add = Eres_add;
 
-		if (guard_add && (roundb_add||sticky_all_add||Mant_add[0])) begin
-			Mant12_add = Mant12_add + 12'd1;
-		end
-
-		//mantissa overflow from rounding
-
-		if (Mant12_add[11]) begin
-			MantFinal_add = Mant12_add[11:1];
-			Efinal_add = Eres_add + 5'd1;
-		end else begin
-			MantFinal_add = Mant12_add[10:0];
-			Efinal_add = Eres_add;
-		end
 		//result, sign is Xs (== Zs)
 		p_add ={Xs, Efinal_add, MantFinal_add[9:0]};
 	end
