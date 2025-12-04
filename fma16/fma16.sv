@@ -1,9 +1,10 @@
 // ==== DISCLAIMER ====
-// For the sake of transparency, generative AI was used to help me clean up some parts of the code and help debug some problems I had.
-//Specific things I had it help me with:
+// For the sake of transparency, generative AI was used to help me clean up some parts of the code and help debug some problems I had. -Ryan
+// Other specific things I had it help me with:
 /*
  - fadd: The case block; formatting
  - fadd: the guard|round|sticky block near the end
+ - had help figuring out a difficulty with an old fadd2 solution; old solution only considered Xs==Zs, but A and B must be picked based on Exp and mantissa too; helped application of negr/negz
 */
 
 //fmul tests completed 0-2
@@ -128,6 +129,11 @@ logic guard_add, roundb_add, sticky_add, sticky2_add, sticky_all_add;
 logic [11:0] Mant12_add;
 logic [10:0] MantFinal_add;
 logic [4:0] Efinal_add;
+logic signA_add, signB_add;
+logic [14:0] DiffExt_add;
+logic [13:0] SubMag_add;
+logic [3:0] sh_add;
+logic signX_eff, signZ_eff;
 
 
 
@@ -137,19 +143,29 @@ always_comb begin
 	NX_add = 1'b0;
 
 	//handle add, no negation, same sign (fadd_0 / fadd_1)
-	if (!mul && add && (negr == 1'b0) && (negz == 1'b0) && (Xs == Zs)) begin
-		//choose operand with larger exponent as A
+	if (add) begin
+		//check effective signs of input (for implementation of negr/negz)
+		signX_eff = Xs ^ negr;
+		signZ_eff = Zs ^ negz;
 
-		if (Xe >= Ze) begin
+		//choose operands, where A is larger, compare exponents then the mantissa
+
+		if ((Xe > Ze) || ((Xe==Ze) && Xm>=Zm)) begin
+			//A=X, B=Z
 			Ae_add = Xe;
 			Asig_add = {1'b1, Xm};
 			Be_add = Ze;
 			Bsig_add = {1'b1, Zm};
+			signA_add=signX_eff;
+			signB_add=signZ_eff;
 		end else begin
+			//A=Z, B=X
 			Ae_add = Ze;
 			Asig_add = {1'b1, Zm};
 			Be_add = Xe;
 			Bsig_add = {1'b1, Xm};
+			signA_add=signZ_eff;
+			signB_add=signX_eff;
 		end
 
 		//extend significands with 3 low bits for guard/round/sticky
@@ -157,7 +173,8 @@ always_comb begin
 		Bext_add = {Bsig_add, 3'b000};
 
 		// exp difference (nonnegative because Ae is the larger)
-		dexp_add =Ae_add - Be_add;
+		dexp_add = Ae_add - Be_add;
+
 
 		// Align B to A with sticky (no variable part-selects)
         case (dexp_add)
@@ -238,33 +255,84 @@ always_comb begin
             end
         endcase
 
-		//add magnitudes
-		SumExt_add = {1'b0, Aext_add} + {1'b0, Baligned_add};
+		//=====Same sign vs different sign===
+		if (signA_add==signB_add) begin
+			SumExt_add = {1'b0, Aext_add} + {1'b0, Baligned_add};
 
-		//normalize: if there is a carry-out, shift right 1 and bump exponent
-		if (SumExt_add[14]) begin
-			NormExt_add = SumExt_add[14:1]; //shift right
-			Eres_add = Ae_add + 5'd1;
+			if (SumExt_add[14]) begin
+				NormExt_add = SumExt_add[14:1]; //shift right
+				Eres_add = Ae_add + 5'd1;
+			end else begin
+				NormExt_add = SumExt_add[13:0];
+				Eres_add = Ae_add;
+			end
+
+			Mant_add = NormExt_add[13:3]; // 11 bits = 1 +10 frac
+			guard_add= NormExt_add[2];
+			roundb_add = NormExt_add[1];
+			sticky2_add = NormExt_add[0]; //includes previous sticky via Baligned[0]
+
+			sticky_all_add = sticky2_add;
+
+			//rne rounding (roundmode is assumed rne for these tests)
+			NX_add = guard_add | roundb_add | sticky_all_add;
+
+			MantFinal_add = Mant_add;
+			Efinal_add = Eres_add;
+
+			//result, sign is Xs (== Zs)
+			p_add ={signA_add, Efinal_add, MantFinal_add[9:0]};
+
 		end else begin
-			NormExt_add = SumExt_add[13:0];
-			Eres_add = Ae_add;
+			// --- different sign addition (fadd_2)
+			//by construction A is larger, so A - B>=0
+			DiffExt_add = {1'b0, Aext_add} - {1'b0, Baligned_add};
+			//check if there is exact cancellation
+			if (DiffExt_add==15'd0) begin
+				MantFinal_add=11'd0;
+				Efinal_add=5'd0;
+				NX_add=sticky_add; //only true if there was an alignment sticky
+				p_add=16'h0000; //final pass
+			end else begin
+				//magnitude of difference -> ignore msb of DiffExt_add
+				SubMag_add = DiffExt_add[13:0];
+
+				//check for leading 0
+				if(SubMag_add[13]) sh_add = 4'd0;
+					else if (SubMag_add[12]) sh_add = 4'd1;
+					else if (SubMag_add[11]) sh_add = 4'd2;
+					else if (SubMag_add[10]) sh_add = 4'd3;
+					else if (SubMag_add[9]) sh_add = 4'd4;
+					else if (SubMag_add[8]) sh_add = 4'd5;
+					else if (SubMag_add[7]) sh_add = 4'd6;
+					else if (SubMag_add[6]) sh_add = 4'd7;
+					else if (SubMag_add[5]) sh_add = 4'd8;
+					else if (SubMag_add[4]) sh_add = 4'd9;
+					else if (SubMag_add[3]) sh_add = 4'd10;
+					else  sh_add = 4'd11;
+
+					NormExt_add= SubMag_add << sh_add;
+
+					if (Ae_add > sh_add) begin
+						Eres_add = Ae_add - sh_add;
+					end else begin
+						Eres_add = 5'd0;
+					end
+					
+					Mant_add = NormExt_add[13:3];
+					guard_add = NormExt_add[2];
+					roundb_add = NormExt_add[1];
+					sticky2_add = NormExt_add[0];
+
+					sticky_all_add= sticky_add | guard_add | roundb_add | sticky2_add;
+					NX_add = sticky_all_add;
+
+					MantFinal_add = Mant_add;
+					Efinal_add = Eres_add;
+
+					p_add = {signA_add, Efinal_add, MantFinal_add[9:0]};
+			end
 		end
-
-		Mant_add = NormExt_add[13:3]; // 11 bits = 1 +10 frac
-		guard_add= NormExt_add[2];
-		roundb_add = NormExt_add[1];
-		sticky2_add = NormExt_add[0]; //includes previous sticky via Baligned[0]
-
-		sticky_all_add = sticky2_add;
-
-		//rne rounding (roundmode is assumed rne for these tests)
-		NX_add = guard_add | roundb_add | sticky_all_add;
-
-		MantFinal_add = Mant_add;
-		Efinal_add = Eres_add;
-
-		//result, sign is Xs (== Zs)
-		p_add ={Xs, Efinal_add, MantFinal_add[9:0]};
 	end
 end
 
