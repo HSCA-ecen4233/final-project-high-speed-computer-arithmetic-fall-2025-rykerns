@@ -87,16 +87,27 @@ assign exp_sum=Xe+Ye-BIAS;
 
 
 //must normalize produict : if pm[21]==1 then shift right and raise exp
+//fma_1: need to round last, no rounding x*y; (exact x*y) + exact z -> then round
+logic [13:0] Pext;
+logic Psticky;
+logic [13:0] Ptemp;
 
 always_comb begin
 	if(Pm[21]) begin
 	//1x.xxx then -> by 1
 		Rm=Pm[21:11]; //top 11 bits
 		exp_norm = exp_sum +1;
+		Ptemp = Pm[21:8]; // 14 remaining bits
+		Psticky = |Pm[7:0]; //the others
 	end else begin //if already [1,2)
 		Rm=Pm[20:10];
 		exp_norm=exp_sum;
+		Ptemp = Pm[20:7];
+		Psticky = |Pm[6:0];
 	end
+	//fold the product sticky into the LSB of the 14-bit mantissa
+	Ptemp[0] = Ptemp[0] | Psticky;
+	Pext = Ptemp;
 end
 
 //keep low 5 bits of exp
@@ -139,6 +150,9 @@ logic [4:0] Xexp_add;
 logic [9:0] Xfrac_add;
 logic [10:0] Xsig_src;
 logic Xs_src;
+logic [13:0] Xext_Base, Zext_Base;
+logic lsb_add, inc_add, lsb_sub, inc_sub;
+
 
 
 
@@ -168,29 +182,32 @@ always_comb begin
 		signX_eff = Xs_src ^ negr; //negate product
 		signZ_eff = Zs ^ negz;
 
+		//extend mantissas for x and z -> 14 bit product with sticky
+		if (mul) begin
+			Xext_Base = Pext;
+		end else begin
+			Xext_Base = {1'b1, Xm, 3'b000};
+		end
+		Zext_Base = {1'b1, Zm, 3'b000};
+
 		if ((Xexp_add > Ze) || ((Xexp_add == Ze) && (Xfrac_add >=Zm))) begin
 			Ae_add = Xexp_add;
-			Asig_add = Xsig_src;
+			Aext_add = Xext_Base;
 			Be_add = Ze;
-			Bsig_add = {1'b1, Zm};
+			Bext_add = Zext_Base;
 			signA_add = signX_eff;
 			signB_add = signZ_eff;
 		end else begin
 			Ae_add = Ze;
-			Asig_add = {1'b1, Zm};
+			Aext_add = Zext_Base;
 			Be_add = Xexp_add;
-			Bsig_add = Xsig_src;
+			Bext_add = Xext_Base;
 			signA_add = signZ_eff;
 			signB_add = signX_eff;
 		end
 
-		//extend significands with 3 low bits for guard/round/sticky
-		Aext_add = {Asig_add, 3'b000};  //11 + 3 = 14 bits
-		Bext_add = {Bsig_add, 3'b000};
-
 		// exp difference (nonnegative because Ae is the larger)
 		dexp_add = Ae_add - Be_add;
-
 
 		// Align B to A with sticky
         case (dexp_add)
@@ -288,13 +305,27 @@ always_comb begin
 			roundb_add = NormExt_add[1];
 			sticky2_add = NormExt_add[0]; //includes previous sticky via Baligned[0]
 
-			sticky_all_add = sticky2_add;
-
+			sticky_all_add = sticky_add | sticky2_add;
 			//rne rounding (roundmode is assumed rne for these tests)
 			NX_add = guard_add | roundb_add | sticky_all_add;
 
-			MantFinal_add = Mant_add;
-			Efinal_add = Eres_add;
+			//setup for the increment logic
+			Mant12_add = {1'b0, Mant_add};
+			lsb_add = Mant_add[0];
+			inc_add = guard_add && (roundb_add | sticky_all_add | lsb_add);
+
+			if (inc_add) begin
+				Mant12_add = Mant12_add + 12'd1;
+			end
+
+			//overflow: shift mantissa and bump exponent;
+			if (Mant12_add[11]) begin
+				MantFinal_add = Mant12_add[11:1];
+				Efinal_add = Eres_add + 5'd1;
+			end else begin
+				MantFinal_add = Mant12_add[10:0];
+				Efinal_add = Eres_add;
+			end
 
 			//result, sign is Xs (== Zs)
 			p_add ={signA_add, Efinal_add, MantFinal_add[9:0]};
@@ -340,11 +371,24 @@ always_comb begin
 					roundb_add = NormExt_add[1];
 					sticky2_add = NormExt_add[0];
 
-					sticky_all_add= sticky_add | guard_add | roundb_add | sticky2_add;
-					NX_add = sticky_all_add;
+					sticky_all_add = sticky_add | sticky2_add;
+					NX_add = guard_add | roundb_add | sticky_all_add;
 
-					MantFinal_add = Mant_add;
-					Efinal_add = Eres_add;
+					Mant12_add = {1'b0, Mant_add};
+					lsb_sub = Mant_add[0];
+					inc_sub = guard_add && (roundb_add | sticky_all_add | lsb_sub);
+
+					if	(inc_sub) begin
+						Mant12_add = Mant12_add + 12'd1;
+					end
+
+					if (Mant12_add[11]) begin
+						MantFinal_add = Mant12_add[11:1];
+						Efinal_add = Eres_add + 5'd1;
+					end else begin
+						MantFinal_add = Mant12_add[10:0];
+						Efinal_add = Eres_add;
+					end
 
 					p_add = {signA_add, Efinal_add, MantFinal_add[9:0]};
 			end
