@@ -5,7 +5,6 @@
  - fadd: The case block; formatting
  - fadd: the guard|round|sticky block near the end
  - had help figuring out a difficulty with an old fadd2 solution; old solution only considered Xs==Zs, but A and B must be picked based on Exp and mantissa too; helped application of negr/negz
- - how to start with the fma stuff for milestone 3; idea to embed the mult block in the add block
 */
 
 //fmul tests completed 0-2
@@ -45,12 +44,43 @@ logic [21:0] Pm; //product of significands
 logic Ps; // product sign
 
 localparam int BIAS = 15;
+int exptemp; //signed intermediary exponent
 logic [6:0] exp_sum; //exponent sum
 logic [6:0] exp_norm; //exponent normalized
 logic [4:0] Re; //final exponent
 
 logic [10:0] Rm; //normalized significand
 logic [9:0] Rf; //stored fraction
+
+logic [15:0] p_add;
+logic NX_add, NX_mul;  // inexact flag for add and mul path
+
+logic [4:0] Ae_add, Be_add;
+logic [10:0] Asig_add, Bsig_add;
+logic [13:0] Aext_add, Bext_add;
+logic [4:0] dexp_add;
+logic [13:0] Baligned_add;
+logic [14:0] SumExt_add;
+logic [13:0] NormExt_add;
+logic [4:0] Eres_add;
+logic [10:0] Mant_add; //1 + 10 fractional bits
+logic guard_add, roundb_add, sticky_add, sticky2_add, sticky_all_add, guard_mul, round_mul, sticky_mul;
+logic [11:0] Mant12_add;
+logic [10:0] MantFinal_add;
+logic [4:0] Efinal_add;
+logic signA_add, signB_add;
+logic [14:0] DiffExt_add;
+logic [13:0] SubMag_add;
+logic [3:0] sh_add;
+logic signX_eff, signZ_eff;
+logic [4:0] Xexp_add;
+logic [9:0] Xfrac_add;
+logic [10:0] Xsig_src;
+logic Xs_src;
+logic [13:0] Xext_Base, Zext_Base;
+logic lsb_add, inc_add, lsb_sub, inc_sub;
+logic inexact_add;
+logic [15:0] x_abs, y_abs, z_abs;
 
 always_comb begin
 	//break x, y, z into sign/exp/frac
@@ -74,41 +104,68 @@ end
 assign Xsig = {1'b1, Xm};
 assign Ysig = {1'b1, Ym};
 
-//fmul core:
-
 //sign of product
 assign Ps = Xs ^ Ys;
 
 //significand product
 assign Pm=Xsig*Ysig;
 
-//Exponent (sum-bias)
-assign exp_sum=Xe+Ye-BIAS;
+//fma_1: was experiencing alot of underflow errors, which I think is from the exponent sum being negative when exp_sum is calculated, 
+//but exp_sum is unsigned, so we should treat negative exponents as zero
+//fma_1: still getting 3 odd off-by-1 errors that i cant seem to get rid of so im going to skip it for now and come back to it later
 
+always_comb begin
+	// Signed exponent sum
+	exptemp = Xe + Ye - BIAS;
+
+	if (Pm == 22'd0) begin
+		// exact zero product
+		Rm = 11'd0;
+		exp_norm= 7'd0;
+		guard_mul = 1'b0;
+		round_mul = 1'b0;
+		sticky_mul = 1'b0;
+	end else if (Pm[21]) begin
+		// product mantissa in [2,4) -> normalize with +1 to exponent
+		if (exptemp + 1 < 0) begin
+			// underflow after normalization
+			Rm = 11'd0;
+			exp_norm = 7'd0;
+			guard_mul = 1'b0;
+			round_mul = 1'b0;
+			sticky_mul = 1'b0;
+		end else begin
+			// keep top 11 bits as mantissa
+			Rm = Pm[21:11]; // 1.xxxxx xxxxx (11 bits)
+			exp_norm = exptemp + 1;
+
+			// GRS from lower bits of Pm
+			guard_mul = Pm[10];
+			round_mul = Pm[9];
+			sticky_mul = |Pm[8:1];
+		end
+	end else begin
+		// product mantissa in [1,2)
+		if (exptemp < 0) begin
+			// underflow
+			Rm = 11'd0;
+			exp_norm = 7'd0;
+			guard_mul = 1'b0;
+			round_mul = 1'b0;
+			sticky_mul = 1'b0;
+		end else begin
+			Rm = Pm[20:10];
+			exp_norm = exptemp;
+
+			guard_mul = Pm[9];
+			round_mul = Pm[8];
+			sticky_mul = |Pm[7:1];
+		end
+	end
+end
 
 //must normalize produict : if pm[21]==1 then shift right and raise exp
 //fma_1: need to round last, no rounding x*y; (exact x*y) + exact z -> then round
-logic [13:0] Pext;
-logic Psticky;
-logic [13:0] Ptemp;
-
-always_comb begin
-	if(Pm[21]) begin
-	//1x.xxx then -> by 1
-		Rm=Pm[21:11]; //top 11 bits
-		exp_norm = exp_sum +1;
-		Ptemp = Pm[21:8]; // 14 remaining bits
-		Psticky = |Pm[7:0]; //the others
-	end else begin //if already [1,2)
-		Rm=Pm[20:10];
-		exp_norm=exp_sum;
-		Ptemp = Pm[20:7];
-		Psticky = |Pm[6:0];
-	end
-	//fold the product sticky into the LSB of the 14-bit mantissa
-	Ptemp[0] = Ptemp[0] | Psticky;
-	Pext = Ptemp;
-end
 
 //keep low 5 bits of exp
 assign Re = exp_norm[4:0];
@@ -124,35 +181,6 @@ assign p_mul = {Ps,Re,Rf};
 
 // ====== fadd stuff ======
 //we want to make a general x + z for positive, same-sign, normalized numbers (fadd_0 and fadd_1)
-
-logic [15:0] p_add;
-logic NX_add;  // inexact flag for add path
-
-logic [4:0] Ae_add, Be_add;
-logic [10:0] Asig_add, Bsig_add;
-logic [13:0] Aext_add, Bext_add;
-logic [4:0] dexp_add;
-logic [13:0] Baligned_add;
-logic [14:0] SumExt_add;
-logic [13:0] NormExt_add;
-logic [4:0] Eres_add;
-logic [10:0] Mant_add; //1 + 10 fractional bits
-logic guard_add, roundb_add, sticky_add, sticky2_add, sticky_all_add;
-logic [11:0] Mant12_add;
-logic [10:0] MantFinal_add;
-logic [4:0] Efinal_add;
-logic signA_add, signB_add;
-logic [14:0] DiffExt_add;
-logic [13:0] SubMag_add;
-logic [3:0] sh_add;
-logic signX_eff, signZ_eff;
-logic [4:0] Xexp_add;
-logic [9:0] Xfrac_add;
-logic [10:0] Xsig_src;
-logic Xs_src;
-logic [13:0] Xext_Base, Zext_Base;
-logic lsb_add, inc_add, lsb_sub, inc_sub;
-
 
 
 
@@ -182,13 +210,16 @@ always_comb begin
 		signX_eff = Xs_src ^ negr; //negate product
 		signZ_eff = Zs ^ negz;
 
-		//extend mantissas for x and z -> 14 bit product with sticky
+		//extend mantissas for x and z -> 14 bit with guard/round/sticky
 		if (mul) begin
-			Xext_Base = Pext;
+			// product:[Rm(11 bits), guard_mul, round_mul, sticky_mul] = 14 bits
+			Xext_Base = {Rm, guard_mul, round_mul, sticky_mul};
 		end else begin
+			// regular input x: [1, Xm(10 bits), 3 zeros] = 14 bits
 			Xext_Base = {1'b1, Xm, 3'b000};
 		end
-		Zext_Base = {1'b1, Zm, 3'b000};
+
+Zext_Base = {1'b1, Zm, 3'b000};
 
 		if ((Xexp_add > Ze) || ((Xexp_add == Ze) && (Xfrac_add >=Zm))) begin
 			Ae_add = Xexp_add;
@@ -288,7 +319,7 @@ always_comb begin
             end
         endcase
 
-		//=====Same sign vs different sign===
+		//=====Same sign branch====
 		if (signA_add==signB_add) begin
 			SumExt_add = {1'b0, Aext_add} + {1'b0, Baligned_add};
 
@@ -312,7 +343,27 @@ always_comb begin
 			//setup for the increment logic
 			Mant12_add = {1'b0, Mant_add};
 			lsb_add = Mant_add[0];
-			inc_add = guard_add && (roundb_add | sticky_all_add | lsb_add);
+
+			//----roundmode incrementing ----
+
+			unique case (roundmode)
+				2'b00: begin
+					//Round toward zero
+					inc_add = 1'b0;
+				end
+				2'b01: begin
+					//round nearest even (RNE)
+					inc_add = guard_add && (roundb_add|sticky_all_add|lsb_add);
+				end
+				2'b10: begin
+					//round to +inf
+					inc_add = (~signA_add) & NX_add;
+				end
+				2'b11: begin
+					//round to -inf
+					inc_add = signA_add & NX_add;
+				end
+			endcase	
 
 			if (inc_add) begin
 				Mant12_add = Mant12_add + 12'd1;
@@ -331,16 +382,18 @@ always_comb begin
 			p_add ={signA_add, Efinal_add, MantFinal_add[9:0]};
 
 		end else begin
-			// --- different sign addition (fadd_2)
+			// --- different sign addition (fadd_2)---
+
 			//by construction A is larger, so A - B>=0
 			DiffExt_add = {1'b0, Aext_add} - {1'b0, Baligned_add};
+
 			//check if there is exact cancellation
 			if (DiffExt_add==15'd0) begin
 				MantFinal_add=11'd0;
 				Efinal_add=5'd0;
 				NX_add=sticky_add; //only true if there was an alignment sticky
 				p_add=16'h0000; //final pass
-			end else begin
+			end else begin //if it does not cancel cleanly...
 				//magnitude of difference -> ignore msb of DiffExt_add
 				SubMag_add = DiffExt_add[13:0];
 
@@ -376,8 +429,26 @@ always_comb begin
 
 					Mant12_add = {1'b0, Mant_add};
 					lsb_sub = Mant_add[0];
-					inc_sub = guard_add && (roundb_add | sticky_all_add | lsb_sub);
 
+					unique case (roundmode)
+						2'b00: begin
+							//Round toward zero
+							inc_sub = 1'b0;
+						end
+						2'b01: begin
+							//round nearest even (RNE)
+							inc_sub = guard_add && (roundb_add|sticky_all_add|lsb_sub);
+						end
+						2'b10: begin
+							//round to +inf
+							inc_sub = (~signA_add) & NX_add;
+						end
+						2'b11: begin
+							//round to -inf
+							inc_sub = signA_add & NX_add;
+						end
+					endcase	
+					
 					if	(inc_sub) begin
 						Mant12_add = Mant12_add + 12'd1;
 					end
@@ -411,9 +482,11 @@ always_comb begin
 		p = p_add;
 		flags_next = {3'b000, NX_add};
 	end else if (mul) begin
+		//mul only
 		p = p_mul;
 		flags_next = 4'b0000;
 	end else if (add) begin
+		//add only
 		p=p_add;
 		flags_next = {3'b000, NX_add};
 	end
