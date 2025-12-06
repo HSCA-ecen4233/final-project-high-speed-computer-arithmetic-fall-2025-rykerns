@@ -499,18 +499,18 @@ module fma16 (x, y, z, mul, add, negr, negz,
             end else begin
                SubMag_add = DiffExt_add[13:0];
 
-               if      (SubMag_add[13]) sh_add = 4'd0;
-               else if (SubMag_add[12]) sh_add = 4'd1;
-               else if (SubMag_add[11]) sh_add = 4'd2;
-               else if (SubMag_add[10]) sh_add = 4'd3;
-               else if (SubMag_add[9])  sh_add = 4'd4;
-               else if (SubMag_add[8])  sh_add = 4'd5;
-               else if (SubMag_add[7])  sh_add = 4'd6;
-               else if (SubMag_add[6])  sh_add = 4'd7;
-               else if (SubMag_add[5])  sh_add = 4'd8;
-               else if (SubMag_add[4])  sh_add = 4'd9;
-               else if (SubMag_add[3])  sh_add = 4'd10;
-               else                     sh_add = 4'd11;
+               if      (SubMag_add[13]) sh_add = 5'd0;
+               else if (SubMag_add[12]) sh_add = 5'd1;
+               else if (SubMag_add[11]) sh_add = 5'd2;
+               else if (SubMag_add[10]) sh_add = 5'd3;
+               else if (SubMag_add[9])  sh_add = 5'd4;
+               else if (SubMag_add[8])  sh_add = 5'd5;
+               else if (SubMag_add[7])  sh_add = 5'd6;
+               else if (SubMag_add[6])  sh_add = 5'd7;
+               else if (SubMag_add[5])  sh_add = 5'd8;
+               else if (SubMag_add[4])  sh_add = 5'd9;
+               else if (SubMag_add[3])  sh_add = 5'd10;
+               else                     sh_add = 5'd11;
 
                NormExt_add = SubMag_add << sh_add;
 
