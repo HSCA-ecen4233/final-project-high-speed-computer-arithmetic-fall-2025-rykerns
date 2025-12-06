@@ -1,555 +1,171 @@
+Error: inputs 0400 * 0400 + 0400
+  result = 0600 (0400 expected) flags = 0000 (0001 expected)
+Error: inputs 0400 * 0400 + 0600
+  result = 0800 (0600 expected) flags = 0000 (0001 expected)
 Error: inputs 0400 * 0400 + 8600
-  result = 8600 (85ff expected) flags = 0000 (0001 expected)
+  result = 8400 (85ff expected) flags = 0000 (0001 expected)
+Error: inputs 0400 * 0400 + 0401
+  result = 0601 (0401 expected) flags = 0000 (0001 expected)
 Error: inputs 0400 * 0400 + 8401
-  result = 8401 (8400 expected) flags = 0000 (0001 expected)
+  result = 8002 (8400 expected) flags = 0000 (0001 expected)
+Error: inputs 0400 * 0400 + 07ff
+  result = 08ff (07ff expected) flags = 0001 (0001 expected)
 Error: inputs 0400 * 0400 + 87ff
-  result = 87ff (87fe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + b800
-  result = b800 (b7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + ba00
-  result = ba00 (b9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + b801
-  result = b801 (b800 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + bbff
-  result = bbff (bbfe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + bc00
-  result = bc00 (bbff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + be00
-  result = be00 (bdff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + bc01
-  result = bc01 (bc00 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + bfff
-  result = bfff (bffe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + c000
-  result = c000 (bfff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + c200
-  result = c200 (c1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + c001
-  result = c001 (c000 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + c3ff
-  result = c3ff (c3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + d000
-  result = d000 (cfff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + d200
-  result = d200 (d1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + d001
-  result = d001 (d000 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + d3ff
-  result = d3ff (d3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + f800
-  result = f800 (f7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + fa00
-  result = fa00 (f9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + f801
-  result = f801 (f800 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0400 + fbff
-  result = fbff (fbfe expected) flags = 0000 (0001 expected)
+  result = 85ff (87fe expected) flags = 0000 (0001 expected)
+Error: inputs 0400 * 0600 + 0400
+  result = 0700 (0400 expected) flags = 0000 (0001 expected)
+Error: inputs 0400 * 0600 + 0600
+  result = 0880 (0600 expected) flags = 0000 (0001 expected)
 Error: inputs 0400 * 0600 + 8600
-  result = 8600 (85ff expected) flags = 0000 (0001 expected)
+  result = 8200 (85ff expected) flags = 0000 (0001 expected)
+Error: inputs 0400 * 0600 + 0401
+  result = 0701 (0401 expected) flags = 0000 (0001 expected)
 Error: inputs 0400 * 0600 + 8401
-  result = 8401 (8400 expected) flags = 0000 (0001 expected)
+  result = 8004 (8400 expected) flags = 0000 (0001 expected)
+Error: inputs 0400 * 0600 + 07ff
+  result = 097f (07ff expected) flags = 0001 (0001 expected)
 Error: inputs 0400 * 0600 + 87ff
-  result = 87ff (87fe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + b800
-  result = b800 (b7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + ba00
-  result = ba00 (b9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + b801
-  result = b801 (b800 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + bbff
-  result = bbff (bbfe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + bc00
-  result = bc00 (bbff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + be00
-  result = be00 (bdff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + bc01
-  result = bc01 (bc00 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + bfff
-  result = bfff (bffe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + c000
-  result = c000 (bfff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + c200
-  result = c200 (c1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + c001
-  result = c001 (c000 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + c3ff
-  result = c3ff (c3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + d000
-  result = d000 (cfff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + d200
-  result = d200 (d1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + d001
-  result = d001 (d000 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + d3ff
-  result = d3ff (d3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + f800
-  result = f800 (f7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + fa00
-  result = fa00 (f9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + f801
-  result = f801 (f800 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0600 + fbff
-  result = fbff (fbfe expected) flags = 0000 (0001 expected)
+  result = 84ff (87fe expected) flags = 0000 (0001 expected)
+Error: inputs 0400 * 0401 + 0400
+  result = 0600 (0400 expected) flags = 0001 (0001 expected)
+Error: inputs 0400 * 0401 + 0600
+  result = 0800 (0600 expected) flags = 0001 (0001 expected)
 Error: inputs 0400 * 0401 + 8600
-  result = 8600 (85ff expected) flags = 0000 (0001 expected)
+  result = 83ff (85ff expected) flags = 0000 (0001 expected)
+Error: inputs 0400 * 0401 + 0401
+  result = 0601 (0401 expected) flags = 0001 (0001 expected)
 Error: inputs 0400 * 0401 + 8401
-  result = 8401 (8400 expected) flags = 0000 (0001 expected)
+  result = 8001 (8400 expected) flags = 0000 (0001 expected)
+Error: inputs 0400 * 0401 + 07ff
+  result = 08ff (07ff expected) flags = 0001 (0001 expected)
 Error: inputs 0400 * 0401 + 87ff
-  result = 87ff (87fe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + b800
-  result = b800 (b7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + ba00
-  result = ba00 (b9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + b801
-  result = b801 (b800 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + bbff
-  result = bbff (bbfe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + bc00
-  result = bc00 (bbff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + be00
-  result = be00 (bdff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + bc01
-  result = bc01 (bc00 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + bfff
-  result = bfff (bffe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + c000
-  result = c000 (bfff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + c200
-  result = c200 (c1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + c001
-  result = c001 (c000 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + c3ff
-  result = c3ff (c3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + d000
-  result = d000 (cfff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + d200
-  result = d200 (d1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + d001
-  result = d001 (d000 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + d3ff
-  result = d3ff (d3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + f800
-  result = f800 (f7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + fa00
-  result = fa00 (f9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + f801
-  result = f801 (f800 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 0401 + fbff
-  result = fbff (fbfe expected) flags = 0000 (0001 expected)
+  result = 85fe (87fe expected) flags = 0001 (0001 expected)
+Error: inputs 0400 * 07ff + 0400
+  result = 07ff (0400 expected) flags = 0001 (0001 expected)
+Error: inputs 0400 * 07ff + 0600
+  result = 08ff (0600 expected) flags = 0001 (0001 expected)
 Error: inputs 0400 * 07ff + 8600
-  result = 8600 (85ff expected) flags = 0000 (0001 expected)
+  result = 8001 (85ff expected) flags = 0000 (0001 expected)
+Error: inputs 0400 * 07ff + 0401
+  result = 0800 (0401 expected) flags = 0001 (0001 expected)
 Error: inputs 0400 * 07ff + 8401
-  result = 8401 (8400 expected) flags = 0000 (0001 expected)
+  result = 8200 (8400 expected) flags = 0000 (0001 expected)
+Error: inputs 0400 * 07ff + 07ff
+  result = 09ff (07ff expected) flags = 0001 (0001 expected)
 Error: inputs 0400 * 07ff + 87ff
-  result = 87ff (87fe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + b800
-  result = b800 (b7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + ba00
-  result = ba00 (b9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + b801
-  result = b801 (b800 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + bbff
-  result = bbff (bbfe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + bc00
-  result = bc00 (bbff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + be00
-  result = be00 (bdff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + bc01
-  result = bc01 (bc00 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + bfff
-  result = bfff (bffe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + c000
-  result = c000 (bfff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + c200
-  result = c200 (c1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + c001
-  result = c001 (c000 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + c3ff
-  result = c3ff (c3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + d000
-  result = d000 (cfff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + d200
-  result = d200 (d1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + d001
-  result = d001 (d000 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + d3ff
-  result = d3ff (d3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + f800
-  result = f800 (f7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + fa00
-  result = fa00 (f9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + f801
-  result = f801 (f800 expected) flags = 0000 (0001 expected)
-Error: inputs 0400 * 07ff + fbff
-  result = fbff (fbfe expected) flags = 0000 (0001 expected)
+  result = 83ff (87fe expected) flags = 0000 (0001 expected)
+Error: inputs 0600 * 0400 + 0400
+  result = 0700 (0400 expected) flags = 0000 (0001 expected)
+Error: inputs 0600 * 0400 + 0600
+  result = 0880 (0600 expected) flags = 0000 (0001 expected)
 Error: inputs 0600 * 0400 + 8600
-  result = 8600 (85ff expected) flags = 0000 (0001 expected)
+  result = 8200 (85ff expected) flags = 0000 (0001 expected)
+Error: inputs 0600 * 0400 + 0401
+  result = 0701 (0401 expected) flags = 0000 (0001 expected)
 Error: inputs 0600 * 0400 + 8401
-  result = 8401 (8400 expected) flags = 0000 (0001 expected)
+  result = 8004 (8400 expected) flags = 0000 (0001 expected)
+Error: inputs 0600 * 0400 + 07ff
+  result = 097f (07ff expected) flags = 0001 (0001 expected)
 Error: inputs 0600 * 0400 + 87ff
-  result = 87ff (87fe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + b800
-  result = b800 (b7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + ba00
-  result = ba00 (b9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + b801
-  result = b801 (b800 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + bbff
-  result = bbff (bbfe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + bc00
-  result = bc00 (bbff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + be00
-  result = be00 (bdff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + bc01
-  result = bc01 (bc00 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + bfff
-  result = bfff (bffe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + c000
-  result = c000 (bfff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + c200
-  result = c200 (c1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + c001
-  result = c001 (c000 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + c3ff
-  result = c3ff (c3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + d000
-  result = d000 (cfff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + d200
-  result = d200 (d1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + d001
-  result = d001 (d000 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + d3ff
-  result = d3ff (d3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + f800
-  result = f800 (f7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + fa00
-  result = fa00 (f9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + f801
-  result = f801 (f800 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0400 + fbff
-  result = fbff (fbfe expected) flags = 0000 (0001 expected)
+  result = 84ff (87fe expected) flags = 0000 (0001 expected)
+Error: inputs 0600 * 0600 + 0400
+  result = 0640 (0400 expected) flags = 0000 (0001 expected)
+Error: inputs 0600 * 0600 + 0600
+  result = 0820 (0600 expected) flags = 0000 (0001 expected)
 Error: inputs 0600 * 0600 + 8600
-  result = 8600 (85ff expected) flags = 0000 (0001 expected)
+  result = 8380 (85ff expected) flags = 0000 (0001 expected)
+Error: inputs 0600 * 0600 + 0401
+  result = 0641 (0401 expected) flags = 0000 (0001 expected)
 Error: inputs 0600 * 0600 + 8401
-  result = 8401 (8400 expected) flags = 0000 (0001 expected)
+  result = 8304 (8400 expected) flags = 0000 (0001 expected)
+Error: inputs 0600 * 0600 + 07ff
+  result = 091f (07ff expected) flags = 0001 (0001 expected)
 Error: inputs 0600 * 0600 + 87ff
-  result = 87ff (87fe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + b800
-  result = b800 (b7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + ba00
-  result = ba00 (b9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + b801
-  result = b801 (b800 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + bbff
-  result = bbff (bbfe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + bc00
-  result = bc00 (bbff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + be00
-  result = be00 (bdff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + bc01
-  result = bc01 (bc00 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + bfff
-  result = bfff (bffe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + c000
-  result = c000 (bfff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + c200
-  result = c200 (c1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + c001
-  result = c001 (c000 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + c3ff
-  result = c3ff (c3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + d000
-  result = d000 (cfff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + d200
-  result = d200 (d1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + d001
-  result = d001 (d000 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + d3ff
-  result = d3ff (d3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + f800
-  result = f800 (f7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + fa00
-  result = fa00 (f9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + f801
-  result = f801 (f800 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0600 + fbff
-  result = fbff (fbfe expected) flags = 0000 (0001 expected)
+  result = 85bf (87fe expected) flags = 0000 (0001 expected)
+Error: inputs 0600 * 0401 + 0400
+  result = 0700 (0400 expected) flags = 0001 (0001 expected)
+Error: inputs 0600 * 0401 + 0600
+  result = 0880 (0600 expected) flags = 0001 (0001 expected)
 Error: inputs 0600 * 0401 + 8600
-  result = 8600 (85ff expected) flags = 0000 (0001 expected)
+  result = 81fe (85ff expected) flags = 0001 (0001 expected)
+Error: inputs 0600 * 0401 + 0401
+  result = 0701 (0401 expected) flags = 0001 (0001 expected)
 Error: inputs 0600 * 0401 + 8401
-  result = 8401 (8400 expected) flags = 0000 (0001 expected)
+  result = 8001 (8400 expected) flags = 0000 (0001 expected)
+Error: inputs 0600 * 0401 + 07ff
+  result = 097f (07ff expected) flags = 0001 (0001 expected)
 Error: inputs 0600 * 0401 + 87ff
-  result = 87ff (87fe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + b800
-  result = b800 (b7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + ba00
-  result = ba00 (b9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + b801
-  result = b801 (b800 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + bbff
-  result = bbff (bbfe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + bc00
-  result = bc00 (bbff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + be00
-  result = be00 (bdff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + bc01
-  result = bc01 (bc00 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + bfff
-  result = bfff (bffe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + c000
-  result = c000 (bfff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + c200
-  result = c200 (c1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + c001
-  result = c001 (c000 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + c3ff
-  result = c3ff (c3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + d000
-  result = d000 (cfff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + d200
-  result = d200 (d1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + d001
-  result = d001 (d000 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + d3ff
-  result = d3ff (d3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + f800
-  result = f800 (f7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + fa00
-  result = fa00 (f9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + f801
-  result = f801 (f800 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 0401 + fbff
-  result = fbff (fbfe expected) flags = 0000 (0001 expected)
+  result = 84fe (87fe expected) flags = 0001 (0001 expected)
+Error: inputs 0600 * 07ff + 0400
+  result = 06ff (0400 expected) flags = 0001 (0001 expected)
+Error: inputs 0600 * 07ff + 0600
+  result = 087f (0600 expected) flags = 0001 (0001 expected)
 Error: inputs 0600 * 07ff + 8600
-  result = 8600 (85ff expected) flags = 0000 (0001 expected)
+  result = 8200 (85ff expected) flags = 0001 (0001 expected)
+Error: inputs 0600 * 07ff + 0401
+  result = 0700 (0401 expected) flags = 0001 (0001 expected)
 Error: inputs 0600 * 07ff + 8401
-  result = 8401 (8400 expected) flags = 0000 (0001 expected)
+  result = 8005 (8400 expected) flags = 0001 (0001 expected)
+Error: inputs 0600 * 07ff + 07ff
+  result = 097f (07ff expected) flags = 0001 (0001 expected)
 Error: inputs 0600 * 07ff + 87ff
-  result = 87ff (87fe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + b800
-  result = b800 (b7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + ba00
-  result = ba00 (b9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + b801
-  result = b801 (b800 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + bbff
-  result = bbff (bbfe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + bc00
-  result = bc00 (bbff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + be00
-  result = be00 (bdff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + bc01
-  result = bc01 (bc00 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + bfff
-  result = bfff (bffe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + c000
-  result = c000 (bfff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + c200
-  result = c200 (c1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + c001
-  result = c001 (c000 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + c3ff
-  result = c3ff (c3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + d000
-  result = d000 (cfff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + d200
-  result = d200 (d1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + d001
-  result = d001 (d000 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + d3ff
-  result = d3ff (d3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + f800
-  result = f800 (f7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + fa00
-  result = fa00 (f9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + f801
-  result = f801 (f800 expected) flags = 0000 (0001 expected)
-Error: inputs 0600 * 07ff + fbff
-  result = fbff (fbfe expected) flags = 0000 (0001 expected)
+  result = 84ff (87fe expected) flags = 0001 (0001 expected)
+Error: inputs 0401 * 0400 + 0400
+  result = 0600 (0400 expected) flags = 0001 (0001 expected)
+Error: inputs 0401 * 0400 + 0600
+  result = 0800 (0600 expected) flags = 0001 (0001 expected)
 Error: inputs 0401 * 0400 + 8600
-  result = 8600 (85ff expected) flags = 0000 (0001 expected)
+  result = 83ff (85ff expected) flags = 0000 (0001 expected)
+Error: inputs 0401 * 0400 + 0401
+  result = 0601 (0401 expected) flags = 0001 (0001 expected)
 Error: inputs 0401 * 0400 + 8401
-  result = 8401 (8400 expected) flags = 0000 (0001 expected)
+  result = 8001 (8400 expected) flags = 0000 (0001 expected)
+Error: inputs 0401 * 0400 + 07ff
+  result = 08ff (07ff expected) flags = 0001 (0001 expected)
 Error: inputs 0401 * 0400 + 87ff
-  result = 87ff (87fe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + b800
-  result = b800 (b7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + ba00
-  result = ba00 (b9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + b801
-  result = b801 (b800 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + bbff
-  result = bbff (bbfe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + bc00
-  result = bc00 (bbff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + be00
-  result = be00 (bdff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + bc01
-  result = bc01 (bc00 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + bfff
-  result = bfff (bffe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + c000
-  result = c000 (bfff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + c200
-  result = c200 (c1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + c001
-  result = c001 (c000 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + c3ff
-  result = c3ff (c3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + d000
-  result = d000 (cfff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + d200
-  result = d200 (d1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + d001
-  result = d001 (d000 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + d3ff
-  result = d3ff (d3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + f800
-  result = f800 (f7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + fa00
-  result = fa00 (f9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + f801
-  result = f801 (f800 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0400 + fbff
-  result = fbff (fbfe expected) flags = 0000 (0001 expected)
+  result = 85fe (87fe expected) flags = 0001 (0001 expected)
+Error: inputs 0401 * 0600 + 0400
+  result = 0700 (0400 expected) flags = 0001 (0001 expected)
+Error: inputs 0401 * 0600 + 0600
+  result = 0880 (0600 expected) flags = 0001 (0001 expected)
 Error: inputs 0401 * 0600 + 8600
-  result = 8600 (85ff expected) flags = 0000 (0001 expected)
+  result = 81fe (85ff expected) flags = 0001 (0001 expected)
+Error: inputs 0401 * 0600 + 0401
+  result = 0701 (0401 expected) flags = 0001 (0001 expected)
 Error: inputs 0401 * 0600 + 8401
-  result = 8401 (8400 expected) flags = 0000 (0001 expected)
+  result = 8001 (8400 expected) flags = 0000 (0001 expected)
+Error: inputs 0401 * 0600 + 07ff
+  result = 097f (07ff expected) flags = 0001 (0001 expected)
 Error: inputs 0401 * 0600 + 87ff
-  result = 87ff (87fe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + b800
-  result = b800 (b7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + ba00
-  result = ba00 (b9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + b801
-  result = b801 (b800 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + bbff
-  result = bbff (bbfe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + bc00
-  result = bc00 (bbff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + be00
-  result = be00 (bdff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + bc01
-  result = bc01 (bc00 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + bfff
-  result = bfff (bffe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + c000
-  result = c000 (bfff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + c200
-  result = c200 (c1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + c001
-  result = c001 (c000 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + c3ff
-  result = c3ff (c3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + d000
-  result = d000 (cfff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + d200
-  result = d200 (d1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + d001
-  result = d001 (d000 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + d3ff
-  result = d3ff (d3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + f800
-  result = f800 (f7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + fa00
-  result = fa00 (f9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + f801
-  result = f801 (f800 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0600 + fbff
-  result = fbff (fbfe expected) flags = 0000 (0001 expected)
+  result = 84fe (87fe expected) flags = 0001 (0001 expected)
+Error: inputs 0401 * 0401 + 0400
+  result = 0601 (0400 expected) flags = 0001 (0001 expected)
+Error: inputs 0401 * 0401 + 0600
+  result = 0800 (0600 expected) flags = 0001 (0001 expected)
 Error: inputs 0401 * 0401 + 8600
-  result = 8600 (85ff expected) flags = 0000 (0001 expected)
+  result = 83fd (85ff expected) flags = 0001 (0001 expected)
+Error: inputs 0401 * 0401 + 0401
+  result = 0602 (0401 expected) flags = 0001 (0001 expected)
 Error: inputs 0401 * 0401 + 8401
-  result = 8401 (8400 expected) flags = 0000 (0001 expected)
+  result = 83ff (8400 expected) flags = 0001 (0001 expected)
+Error: inputs 0401 * 0401 + 07ff
+  result = 0900 (07ff expected) flags = 0001 (0001 expected)
 Error: inputs 0401 * 0401 + 87ff
-  result = 87ff (87fe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + b800
-  result = b800 (b7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + ba00
-  result = ba00 (b9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + b801
-  result = b801 (b800 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + bbff
-  result = bbff (bbfe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + bc00
-  result = bc00 (bbff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + be00
-  result = be00 (bdff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + bc01
-  result = bc01 (bc00 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + bfff
-  result = bfff (bffe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + c000
-  result = c000 (bfff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + c200
-  result = c200 (c1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + c001
-  result = c001 (c000 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + c3ff
-  result = c3ff (c3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + d000
-  result = d000 (cfff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + d200
-  result = d200 (d1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + d001
-  result = d001 (d000 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + d3ff
-  result = d3ff (d3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + f800
-  result = f800 (f7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + fa00
-  result = fa00 (f9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + f801
-  result = f801 (f800 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 0401 + fbff
-  result = fbff (fbfe expected) flags = 0000 (0001 expected)
+  result = 85fd (87fe expected) flags = 0001 (0001 expected)
+Error: inputs 0401 * 07ff + 0400
+  result = 0600 (0400 expected) flags = 0001 (0001 expected)
+Error: inputs 0401 * 07ff + 0600
+  result = 0800 (0600 expected) flags = 0001 (0001 expected)
 Error: inputs 0401 * 07ff + 8600
-  result = 8600 (85ff expected) flags = 0000 (0001 expected)
+  result = 83ff (85ff expected) flags = 0001 (0001 expected)
+Error: inputs 0401 * 07ff + 0401
+  result = 0601 (0401 expected) flags = 0001 (0001 expected)
 Error: inputs 0401 * 07ff + 8401
-  result = 8401 (8400 expected) flags = 0000 (0001 expected)
+  result = 8001 (8400 expected) flags = 0001 (0001 expected)
+Error: inputs 0401 * 07ff + 07ff
+  result = 08ff (07ff expected) flags = 0001 (0001 expected)
 Error: inputs 0401 * 07ff + 87ff
-  result = 87ff (87fe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + b800
-  result = b800 (b7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + ba00
-  result = ba00 (b9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + b801
-  result = b801 (b800 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + bbff
-  result = bbff (bbfe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + bc00
-  result = bc00 (bbff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + be00
-  result = be00 (bdff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + bc01
-  result = bc01 (bc00 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + bfff
-  result = bfff (bffe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + c000
-  result = c000 (bfff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + c200
-  result = c200 (c1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + c001
-  result = c001 (c000 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + c3ff
-  result = c3ff (c3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + d000
-  result = d000 (cfff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + d200
-  result = d200 (d1ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + d001
-  result = d001 (d000 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + d3ff
-  result = d3ff (d3fe expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + f800
-  result = f800 (f7ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + fa00
-  result = fa00 (f9ff expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + f801
-  result = f801 (f800 expected) flags = 0000 (0001 expected)
-Error: inputs 0401 * 07ff + fbff
-  result = fbff (fbfe expected) flags = 0000 (0001 expected)
+  result = 85fe (87fe expected) flags = 0001 (0001 expected)
 Error: inputs 0401 * 3801 + 87ff
   result = 85fe (85fd expected) flags = 0000 (0001 expected)
 Error: inputs 0401 * 7801 + c200
@@ -560,190 +176,62 @@ Error: inputs 0401 * 7801 + c3ff
   result = bffa (bff9 expected) flags = 0000 (0001 expected)
 Error: inputs 0401 * 7bff + c3ff
   result = 1b00 (1bff expected) flags = 0000 (0000 expected)
+Error: inputs 07ff * 0400 + 0400
+  result = 07ff (0400 expected) flags = 0001 (0001 expected)
+Error: inputs 07ff * 0400 + 0600
+  result = 08ff (0600 expected) flags = 0001 (0001 expected)
 Error: inputs 07ff * 0400 + 8600
-  result = 8600 (85ff expected) flags = 0000 (0001 expected)
+  result = 8001 (85ff expected) flags = 0000 (0001 expected)
+Error: inputs 07ff * 0400 + 0401
+  result = 0800 (0401 expected) flags = 0001 (0001 expected)
 Error: inputs 07ff * 0400 + 8401
-  result = 8401 (8400 expected) flags = 0000 (0001 expected)
+  result = 8200 (8400 expected) flags = 0000 (0001 expected)
+Error: inputs 07ff * 0400 + 07ff
+  result = 09ff (07ff expected) flags = 0001 (0001 expected)
 Error: inputs 07ff * 0400 + 87ff
-  result = 87ff (87fe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + b800
-  result = b800 (b7ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + ba00
-  result = ba00 (b9ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + b801
-  result = b801 (b800 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + bbff
-  result = bbff (bbfe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + bc00
-  result = bc00 (bbff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + be00
-  result = be00 (bdff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + bc01
-  result = bc01 (bc00 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + bfff
-  result = bfff (bffe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + c000
-  result = c000 (bfff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + c200
-  result = c200 (c1ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + c001
-  result = c001 (c000 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + c3ff
-  result = c3ff (c3fe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + d000
-  result = d000 (cfff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + d200
-  result = d200 (d1ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + d001
-  result = d001 (d000 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + d3ff
-  result = d3ff (d3fe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + f800
-  result = f800 (f7ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + fa00
-  result = fa00 (f9ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + f801
-  result = f801 (f800 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0400 + fbff
-  result = fbff (fbfe expected) flags = 0000 (0001 expected)
+  result = 83ff (87fe expected) flags = 0000 (0001 expected)
+Error: inputs 07ff * 0600 + 0400
+  result = 06ff (0400 expected) flags = 0001 (0001 expected)
+Error: inputs 07ff * 0600 + 0600
+  result = 087f (0600 expected) flags = 0001 (0001 expected)
 Error: inputs 07ff * 0600 + 8600
-  result = 8600 (85ff expected) flags = 0000 (0001 expected)
+  result = 8200 (85ff expected) flags = 0001 (0001 expected)
+Error: inputs 07ff * 0600 + 0401
+  result = 0700 (0401 expected) flags = 0001 (0001 expected)
 Error: inputs 07ff * 0600 + 8401
-  result = 8401 (8400 expected) flags = 0000 (0001 expected)
+  result = 8005 (8400 expected) flags = 0001 (0001 expected)
+Error: inputs 07ff * 0600 + 07ff
+  result = 097f (07ff expected) flags = 0001 (0001 expected)
 Error: inputs 07ff * 0600 + 87ff
-  result = 87ff (87fe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + b800
-  result = b800 (b7ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + ba00
-  result = ba00 (b9ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + b801
-  result = b801 (b800 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + bbff
-  result = bbff (bbfe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + bc00
-  result = bc00 (bbff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + be00
-  result = be00 (bdff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + bc01
-  result = bc01 (bc00 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + bfff
-  result = bfff (bffe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + c000
-  result = c000 (bfff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + c200
-  result = c200 (c1ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + c001
-  result = c001 (c000 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + c3ff
-  result = c3ff (c3fe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + d000
-  result = d000 (cfff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + d200
-  result = d200 (d1ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + d001
-  result = d001 (d000 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + d3ff
-  result = d3ff (d3fe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + f800
-  result = f800 (f7ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + fa00
-  result = fa00 (f9ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + f801
-  result = f801 (f800 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0600 + fbff
-  result = fbff (fbfe expected) flags = 0000 (0001 expected)
+  result = 84ff (87fe expected) flags = 0001 (0001 expected)
+Error: inputs 07ff * 0401 + 0400
+  result = 0600 (0400 expected) flags = 0001 (0001 expected)
+Error: inputs 07ff * 0401 + 0600
+  result = 0800 (0600 expected) flags = 0001 (0001 expected)
 Error: inputs 07ff * 0401 + 8600
-  result = 8600 (85ff expected) flags = 0000 (0001 expected)
+  result = 83ff (85ff expected) flags = 0001 (0001 expected)
+Error: inputs 07ff * 0401 + 0401
+  result = 0601 (0401 expected) flags = 0001 (0001 expected)
 Error: inputs 07ff * 0401 + 8401
-  result = 8401 (8400 expected) flags = 0000 (0001 expected)
+  result = 8001 (8400 expected) flags = 0001 (0001 expected)
+Error: inputs 07ff * 0401 + 07ff
+  result = 08ff (07ff expected) flags = 0001 (0001 expected)
 Error: inputs 07ff * 0401 + 87ff
-  result = 87ff (87fe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + b800
-  result = b800 (b7ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + ba00
-  result = ba00 (b9ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + b801
-  result = b801 (b800 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + bbff
-  result = bbff (bbfe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + bc00
-  result = bc00 (bbff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + be00
-  result = be00 (bdff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + bc01
-  result = bc01 (bc00 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + bfff
-  result = bfff (bffe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + c000
-  result = c000 (bfff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + c200
-  result = c200 (c1ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + c001
-  result = c001 (c000 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + c3ff
-  result = c3ff (c3fe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + d000
-  result = d000 (cfff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + d200
-  result = d200 (d1ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + d001
-  result = d001 (d000 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + d3ff
-  result = d3ff (d3fe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + f800
-  result = f800 (f7ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + fa00
-  result = fa00 (f9ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + f801
-  result = f801 (f800 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 0401 + fbff
-  result = fbff (fbfe expected) flags = 0000 (0001 expected)
+  result = 85fe (87fe expected) flags = 0001 (0001 expected)
+Error: inputs 07ff * 07ff + 0400
+  result = 07ff (0400 expected) flags = 0001 (0001 expected)
+Error: inputs 07ff * 07ff + 0600
+  result = 08ff (0600 expected) flags = 0001 (0001 expected)
 Error: inputs 07ff * 07ff + 8600
-  result = 8600 (85ff expected) flags = 0000 (0001 expected)
+  result = 8001 (85ff expected) flags = 0001 (0001 expected)
+Error: inputs 07ff * 07ff + 0401
+  result = 0800 (0401 expected) flags = 0001 (0001 expected)
 Error: inputs 07ff * 07ff + 8401
-  result = 8401 (8400 expected) flags = 0000 (0001 expected)
+  result = 8380 (8400 expected) flags = 0001 (0001 expected)
+Error: inputs 07ff * 07ff + 07ff
+  result = 09ff (07ff expected) flags = 0001 (0001 expected)
 Error: inputs 07ff * 07ff + 87ff
-  result = 87ff (87fe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + b800
-  result = b800 (b7ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + ba00
-  result = ba00 (b9ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + b801
-  result = b801 (b800 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + bbff
-  result = bbff (bbfe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + bc00
-  result = bc00 (bbff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + be00
-  result = be00 (bdff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + bc01
-  result = bc01 (bc00 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + bfff
-  result = bfff (bffe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + c000
-  result = c000 (bfff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + c200
-  result = c200 (c1ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + c001
-  result = c001 (c000 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + c3ff
-  result = c3ff (c3fe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + d000
-  result = d000 (cfff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + d200
-  result = d200 (d1ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + d001
-  result = d001 (d000 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + d3ff
-  result = d3ff (d3fe expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + f800
-  result = f800 (f7ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + fa00
-  result = fa00 (f9ff expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + f801
-  result = f801 (f800 expected) flags = 0000 (0001 expected)
-Error: inputs 07ff * 07ff + fbff
-  result = fbff (fbfe expected) flags = 0000 (0001 expected)
+  result = 83ff (87fe expected) flags = 0001 (0001 expected)
 Error: inputs 07ff * 7801 + c3ff
   result = 1b00 (1bff expected) flags = 0000 (0000 expected)
 Error: inputs 3801 * 0401 + 87ff
@@ -902,4 +390,4 @@ Error: inputs 3bff * 7bff + 87ff
   result = 7bfd (7bfe expected) flags = 0001 (0001 expected)
 Error: inputs 3bff * 7bff + fbff
   result = d000 (cfff expected) flags = 0000 (0000 expected)
-     10001 tests completed with        452 errors
+     10001 tests completed with        196 errors

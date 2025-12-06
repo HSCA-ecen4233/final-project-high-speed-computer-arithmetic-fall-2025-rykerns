@@ -65,9 +65,9 @@ logic [13:0] NormExt_add;
 logic [4:0] Eres_add;
 logic [10:0] Mant_add; //1 + 10 fractional bits
 logic guard_add, roundb_add, sticky_add, sticky2_add, sticky_all_add, guard_mul, round_mul, sticky_mul;
-logic [11:0] Mant12_add;
-logic [10:0] MantFinal_add;
-logic [4:0] Efinal_add;
+logic [11:0] Mant12_add, Mant12_mul;
+logic [10:0] MantFinal_add, MantFinal_mul;
+logic [4:0] Efinal_add, Efinal_mul;
 logic signA_add, signB_add;
 logic [14:0] DiffExt_add;
 logic [13:0] SubMag_add;
@@ -78,13 +78,12 @@ logic [9:0] Xfrac_add;
 logic [10:0] Xsig_src;
 logic Xs_src;
 logic [13:0] Xext_Base, Zext_Base;
-logic lsb_add, inc_add, lsb_sub, inc_sub;
+logic lsb_add, inc_add, lsb_sub, inc_sub, lsb_mul, inc_mul;
 logic inexact_add;
 logic [15:0] x_abs, y_abs, z_abs;
 
 always_comb begin
 	//break x, y, z into sign/exp/frac
-
 	Xs = x[15];
 	Xe = x[14:10];
 	Xm = x[9:0];
@@ -112,7 +111,7 @@ assign Pm=Xsig*Ysig;
 
 //fma_1: was experiencing alot of underflow errors, which I think is from the exponent sum being negative when exp_sum is calculated, 
 //but exp_sum is unsigned, so we should treat negative exponents as zero
-//fma_1: still getting 3 odd off-by-1 errors that i cant seem to get rid of so im going to skip it for now and come back to it later
+//fma_1: still getting 3 odd off-by-1 errors that i cant seem to get rid of so im going to skip it for now and come back to it
 
 always_comb begin
 	// Signed exponent sum
@@ -177,295 +176,359 @@ assign Rf = Rm[9:0];
 logic [15:0] p_mul;
 
 //fmul results
-assign p_mul = {Ps,Re,Rf};
+always_comb begin
+// inexact for the product
+NX_mul = guard_mul | round_mul | sticky_mul;
+
+Mant12_mul = {1'b0, Rm};     // 1 + 10 frac bits -> 12 bits
+lsb_mul = Rm[0];
+
+unique case (roundmode)
+	2'b00: begin
+	// RZ
+	inc_mul = 1'b0;
+	end
+	2'b01: begin
+	// RNE
+	inc_mul = guard_mul && (round_mul | sticky_mul | lsb_mul);
+	end
+	2'b10: begin
+	// RP
+	inc_mul = (~Ps) & NX_mul;
+	end
+	2'b11: begin
+	// RN
+	inc_mul = Ps & NX_mul;
+	end
+endcase
+
+if (inc_mul)
+	Mant12_mul = Mant12_mul + 12'd1;
+
+// possible carry out
+if (Mant12_mul[11]) begin
+	MantFinal_mul = Mant12_mul[11:1];
+	Efinal_mul    = Re + 5'd1;
+end else begin
+	MantFinal_mul = Mant12_mul[10:0];
+	Efinal_mul    = Re;
+end
+end
+
+assign p_mul = {Ps, Efinal_mul, MantFinal_mul[9:0]};
 
 // ====== fadd stuff ======
 //we want to make a general x + z for positive, same-sign, normalized numbers (fadd_0 and fadd_1)
 
+//idea to fix fma round by 1 error: find a case, and build Xext_base from Pm rather than
+
+logic tiny_prod_fma;
+
+always_comb begin
+    // reuse exptemp and Pm
+    tiny_prod_fma = 1'b0;
+    if (mul && add && (Pm != 22'd0)) begin
+        if (Pm[21]) begin
+			tiny_prod_fma = (exptemp + 1 < 0);
+		end else begin
+			tiny_prod_fma = (exptemp < 0);
+    	end
+	end
+end
+
+logic [10:0] Rm_fma;
+logic g_fma, r_fma, s_fma;
+logic [21:0] Ptmp;
 
 
 always_comb begin
-	//Defaults
-	p_add = x; // pass-through if not a recognized add
+	// Defaults
+	p_add  = x;     // pass-through if not doing add
 	NX_add = 1'b0;
 
-	//handle add, no negation, same sign (fadd_0 / fadd_1)
 	if (add) begin
-		// in pure add mode (mul=0) : use x -> we pass on the mul block
-		//in fma mode (mul=1) : use product x*y -> use the mul block as well
+		// ========= Choose X operand (product or original x) =========
 		if (mul) begin
-			//use the normalized product stuff (Rm/Re/Ps) as the "new" X
-			Xexp_add = Re;
-			Xfrac_add = Rm[9:0];
-			Xsig_src = Rm;
-			Xs_src = Ps; // sign of product
+			// FMA path: (+- X*Y) +- Z
+			if (tiny_prod_fma) begin
+				// Underflowed product: build a tiny operand from raw Pm
+				Xs_src   = Ps;
+				Xexp_add = 5'd0;  // force a very small exponent
+
+				// Build 1.xxx mantissa and GRS from Pm
+				if (Pm[21]) begin
+					Rm_fma = Pm[21:11];
+					g_fma  = Pm[10];
+					r_fma  = Pm[9];
+					s_fma  = |Pm[8:0];   // include bit 0
+				end else begin
+					Rm_fma = Pm[20:10];
+					g_fma  = Pm[9];
+					r_fma  = Pm[8];
+					s_fma  = |Pm[7:0];
+				end
+
+				Xsig_src  = Rm_fma;
+				Xfrac_add = Rm_fma[9:0];
+				Xext_Base = {Rm_fma, g_fma, r_fma, s_fma};
+			end else begin
+				// Normal product: use the existing mul-normalized path
+				Xs_src   = Ps;
+				Xexp_add = Re;
+				Xfrac_add= Rm[9:0];
+				Xsig_src = Rm;
+				Xext_Base= {Rm, guard_mul, round_mul, sticky_mul};
+			end
 		end else begin
-			//use the original x as X
+			// Pure add path: use original x
+			Xs_src   = Xs;
 			Xexp_add = Xe;
-			Xfrac_add = Xm;
+			Xfrac_add= Xm;
 			Xsig_src = {1'b1, Xm};
-			Xs_src = Xs;
+			Xext_Base= {1'b1, Xm, 3'b000};
 		end
 
-		signX_eff = Xs_src ^ negr; //negate product
+		// Effective signs after optional negations
+		signX_eff = Xs_src ^ negr;
 		signZ_eff = Zs ^ negz;
 
-		//extend mantissas for x and z -> 14 bit with guard/round/sticky
-		if (mul) begin
-			// product:[Rm(11 bits), guard_mul, round_mul, sticky_mul] = 14 bits
-			Xext_Base = {Rm, guard_mul, round_mul, sticky_mul};
-		end else begin
-			// regular input x: [1, Xm(10 bits), 3 zeros] = 14 bits
-			Xext_Base = {1'b1, Xm, 3'b000};
-		end
+		// Z mantissa extended with 3 low zeros
+		Zext_Base = {1'b1, Zm, 3'b000};
 
-Zext_Base = {1'b1, Zm, 3'b000};
-
-		if ((Xexp_add > Ze) || ((Xexp_add == Ze) && (Xfrac_add >=Zm))) begin
-			Ae_add = Xexp_add;
+		// ========= Exponent compare: choose A (larger) and B (smaller) =========
+		if ((Xexp_add > Ze) || ((Xexp_add == Ze) && (Xfrac_add >= Zm))) begin
+			Ae_add   = Xexp_add;
 			Aext_add = Xext_Base;
-			Be_add = Ze;
+			Be_add   = Ze;
 			Bext_add = Zext_Base;
-			signA_add = signX_eff;
-			signB_add = signZ_eff;
+			signA_add= signX_eff;
+			signB_add= signZ_eff;
 		end else begin
-			Ae_add = Ze;
+			Ae_add   = Ze;
 			Aext_add = Zext_Base;
-			Be_add = Xexp_add;
+			Be_add   = Xexp_add;
 			Bext_add = Xext_Base;
-			signA_add = signZ_eff;
-			signB_add = signX_eff;
+			signA_add= signZ_eff;
+			signB_add= signX_eff;
 		end
 
-		// exp difference (nonnegative because Ae is the larger)
+		// ========= Align B to A with sticky =========
 		dexp_add = Ae_add - Be_add;
 
-		// Align B to A with sticky
-        case (dexp_add)
-            5'd0: begin
-                Baligned_add = Bext_add;
-                sticky_add   = 1'b0;
-            end
-            5'd1: begin
-                Baligned_add = Bext_add >> 1;
-                sticky_add   = Bext_add[0];
-                Baligned_add[0] = Baligned_add[0] | sticky_add;
-            end
-            5'd2: begin
-                Baligned_add = Bext_add >> 2;
-                sticky_add   = |Bext_add[1:0];
-                Baligned_add[0] = Baligned_add[0] | sticky_add;
-            end
-            5'd3: begin
-                Baligned_add = Bext_add >> 3;
-                sticky_add   = |Bext_add[2:0];
-                Baligned_add[0] = Baligned_add[0] | sticky_add;
-            end
-            5'd4: begin
-                Baligned_add = Bext_add >> 4;
-                sticky_add   = |Bext_add[3:0];
-                Baligned_add[0] = Baligned_add[0] | sticky_add;
-            end
-            5'd5: begin
-                Baligned_add = Bext_add >> 5;
-                sticky_add   = |Bext_add[4:0];
-                Baligned_add[0] = Baligned_add[0] | sticky_add;
-            end
-            5'd6: begin
-                Baligned_add = Bext_add >> 6;
-                sticky_add   = |Bext_add[5:0];
-                Baligned_add[0] = Baligned_add[0] | sticky_add;
-            end
-            5'd7: begin
-                Baligned_add = Bext_add >> 7;
-                sticky_add   = |Bext_add[6:0];
-                Baligned_add[0] = Baligned_add[0] | sticky_add;
-            end
-            5'd8: begin
-                Baligned_add = Bext_add >> 8;
-                sticky_add   = |Bext_add[7:0];
-                Baligned_add[0] = Baligned_add[0] | sticky_add;
-            end
-            5'd9: begin
-                Baligned_add = Bext_add >> 9;
-                sticky_add   = |Bext_add[8:0];
-                Baligned_add[0] = Baligned_add[0] | sticky_add;
-            end
-            5'd10: begin
-                Baligned_add = Bext_add >> 10;
-                sticky_add   = |Bext_add[9:0];
-                Baligned_add[0] = Baligned_add[0] | sticky_add;
-            end
-            5'd11: begin
-                Baligned_add = Bext_add >> 11;
-                sticky_add   = |Bext_add[10:0];
-                Baligned_add[0] = Baligned_add[0] | sticky_add;
-            end
-            5'd12: begin
-                Baligned_add = Bext_add >> 12;
-                sticky_add   = |Bext_add[11:0];
-                Baligned_add[0] = Baligned_add[0] | sticky_add;
-            end
-            5'd13: begin
-                Baligned_add = Bext_add >> 13;
-                sticky_add   = |Bext_add[12:0];
-                Baligned_add[0] = Baligned_add[0] | sticky_add;
-            end
-            default: begin
-                // dexp_add >= 14: B is so small it’s purely sticky
-                sticky_add   = |Bext_add;
-                Baligned_add = 14'd0;
-                Baligned_add[0] = sticky_add;
-            end
-        endcase
+		case (dexp_add)
+			5'd0: begin
+				Baligned_add = Bext_add;
+				sticky_add   = 1'b0;
+			end
+			5'd1: begin
+				Baligned_add = Bext_add >> 1;
+				sticky_add   = Bext_add[0];
+				Baligned_add[0] = Baligned_add[0] | sticky_add;
+			end
+			5'd2: begin
+				Baligned_add = Bext_add >> 2;
+				sticky_add   = |Bext_add[1:0];
+				Baligned_add[0] = Baligned_add[0] | sticky_add;
+			end
+			5'd3: begin
+				Baligned_add = Bext_add >> 3;
+				sticky_add   = |Bext_add[2:0];
+				Baligned_add[0] = Baligned_add[0] | sticky_add;
+			end
+			5'd4: begin
+				Baligned_add = Bext_add >> 4;
+				sticky_add   = |Bext_add[3:0];
+				Baligned_add[0] = Baligned_add[0] | sticky_add;
+			end
+			5'd5: begin
+				Baligned_add = Bext_add >> 5;
+				sticky_add   = |Bext_add[4:0];
+				Baligned_add[0] = Baligned_add[0] | sticky_add;
+			end
+			5'd6: begin
+				Baligned_add = Bext_add >> 6;
+				sticky_add   = |Bext_add[5:0];
+				Baligned_add[0] = Baligned_add[0] | sticky_add;
+			end
+			5'd7: begin
+				Baligned_add = Bext_add >> 7;
+				sticky_add   = |Bext_add[6:0];
+				Baligned_add[0] = Baligned_add[0] | sticky_add;
+			end
+			5'd8: begin
+				Baligned_add = Bext_add >> 8;
+				sticky_add   = |Bext_add[7:0];
+				Baligned_add[0] = Baligned_add[0] | sticky_add;
+			end
+			5'd9: begin
+				Baligned_add = Bext_add >> 9;
+				sticky_add   = |Bext_add[8:0];
+				Baligned_add[0] = Baligned_add[0] | sticky_add;
+			end
+			5'd10: begin
+				Baligned_add = Bext_add >> 10;
+				sticky_add   = |Bext_add[9:0];
+				Baligned_add[0] = Baligned_add[0] | sticky_add;
+			end
+			5'd11: begin
+				Baligned_add = Bext_add >> 11;
+				sticky_add   = |Bext_add[10:0];
+				Baligned_add[0] = Baligned_add[0] | sticky_add;
+			end
+			5'd12: begin
+				Baligned_add = Bext_add >> 12;
+				sticky_add   = |Bext_add[11:0];
+				Baligned_add[0] = Baligned_add[0] | sticky_add;
+			end
+			5'd13: begin
+				Baligned_add = Bext_add >> 13;
+				sticky_add   = |Bext_add[12:0];
+				Baligned_add[0] = Baligned_add[0] | sticky_add;
+			end
+			default: begin
+				// dexp_add >= 14: B is so small it’s purely sticky
+				sticky_add   = |Bext_add;
+				Baligned_add = 14'd0;
+				Baligned_add[0] = sticky_add;
+			end
+		endcase
 
-		//=====Same sign branch====
-		if (signA_add==signB_add) begin
+		// ========= Same-sign: addition path =========
+		if (signA_add == signB_add) begin
 			SumExt_add = {1'b0, Aext_add} + {1'b0, Baligned_add};
 
 			if (SumExt_add[14]) begin
-				NormExt_add = SumExt_add[14:1]; //shift right
-				Eres_add = Ae_add + 5'd1;
+				NormExt_add = SumExt_add[14:1]; // shift right
+				Eres_add    = Ae_add + 5'd1;
 			end else begin
 				NormExt_add = SumExt_add[13:0];
-				Eres_add = Ae_add;
+				Eres_add    = Ae_add;
 			end
 
-			Mant_add = NormExt_add[13:3]; // 11 bits = 1 +10 frac
-			guard_add= NormExt_add[2];
-			roundb_add = NormExt_add[1];
-			sticky2_add = NormExt_add[0]; //includes previous sticky via Baligned[0]
+			Mant_add    = NormExt_add[13:3]; // 11 bits = 1 + 10 frac
+			guard_add   = NormExt_add[2];
+			roundb_add  = NormExt_add[1];
+			sticky2_add = NormExt_add[0]; // includes previous sticky via Baligned[0]
 
 			sticky_all_add = sticky_add | sticky2_add;
-			//rne rounding (roundmode is assumed rne for these tests)
 			NX_add = guard_add | roundb_add | sticky_all_add;
 
-			//setup for the increment logic
 			Mant12_add = {1'b0, Mant_add};
-			lsb_add = Mant_add[0];
+			lsb_add    = Mant_add[0];
 
-			//----roundmode incrementing ----
-
+			// Rounding increment
 			unique case (roundmode)
 				2'b00: begin
-					//Round toward zero
+					// round toward zero
 					inc_add = 1'b0;
 				end
 				2'b01: begin
-					//round nearest even (RNE)
-					inc_add = guard_add && (roundb_add|sticky_all_add|lsb_add);
+					// round to nearest, ties to even (RNE)
+					inc_add = guard_add && (roundb_add | sticky_all_add | lsb_add);
 				end
 				2'b10: begin
-					//round to +inf
+					// round to +inf
 					inc_add = (~signA_add) & NX_add;
 				end
 				2'b11: begin
-					//round to -inf
+					// round to -inf
 					inc_add = signA_add & NX_add;
 				end
-			endcase	
+			endcase
 
 			if (inc_add) begin
 				Mant12_add = Mant12_add + 12'd1;
 			end
 
-			//overflow: shift mantissa and bump exponent;
 			if (Mant12_add[11]) begin
 				MantFinal_add = Mant12_add[11:1];
-				Efinal_add = Eres_add + 5'd1;
+				Efinal_add    = Eres_add + 5'd1;
 			end else begin
 				MantFinal_add = Mant12_add[10:0];
-				Efinal_add = Eres_add;
+				Efinal_add    = Eres_add;
 			end
 
-			//result, sign is Xs (== Zs)
-			p_add ={signA_add, Efinal_add, MantFinal_add[9:0]};
+			p_add = {signA_add, Efinal_add, MantFinal_add[9:0]};
 
 		end else begin
-			// --- different sign addition (fadd_2)---
-
-			//by construction A is larger, so A - B>=0
+			// ========= Different-sign: subtraction path =========
 			DiffExt_add = {1'b0, Aext_add} - {1'b0, Baligned_add};
 
-			//check if there is exact cancellation
-			if (DiffExt_add==15'd0) begin
-				MantFinal_add=11'd0;
-				Efinal_add=5'd0;
-				NX_add=sticky_add; //only true if there was an alignment sticky
-				p_add=16'h0000; //final pass
-			end else begin //if it does not cancel cleanly...
-				//magnitude of difference -> ignore msb of DiffExt_add
+			if (DiffExt_add == 15'd0) begin
+				MantFinal_add = 11'd0;
+				Efinal_add    = 5'd0;
+				NX_add        = sticky_add;
+				p_add         = 16'h0000;
+			end else begin
 				SubMag_add = DiffExt_add[13:0];
 
-				//check for leading 0
-				if(SubMag_add[13]) sh_add = 4'd0;
-					else if (SubMag_add[12]) sh_add = 4'd1;
-					else if (SubMag_add[11]) sh_add = 4'd2;
-					else if (SubMag_add[10]) sh_add = 4'd3;
-					else if (SubMag_add[9]) sh_add = 4'd4;
-					else if (SubMag_add[8]) sh_add = 4'd5;
-					else if (SubMag_add[7]) sh_add = 4'd6;
-					else if (SubMag_add[6]) sh_add = 4'd7;
-					else if (SubMag_add[5]) sh_add = 4'd8;
-					else if (SubMag_add[4]) sh_add = 4'd9;
-					else if (SubMag_add[3]) sh_add = 4'd10;
-					else  sh_add = 4'd11;
+				if      (SubMag_add[13]) sh_add = 4'd0;
+				else if (SubMag_add[12]) sh_add = 4'd1;
+				else if (SubMag_add[11]) sh_add = 4'd2;
+				else if (SubMag_add[10]) sh_add = 4'd3;
+				else if (SubMag_add[9])  sh_add = 4'd4;
+				else if (SubMag_add[8])  sh_add = 4'd5;
+				else if (SubMag_add[7])  sh_add = 4'd6;
+				else if (SubMag_add[6])  sh_add = 4'd7;
+				else if (SubMag_add[5])  sh_add = 4'd8;
+				else if (SubMag_add[4])  sh_add = 4'd9;
+				else if (SubMag_add[3])  sh_add = 4'd10;
+				else                     sh_add = 4'd11;
 
-					NormExt_add= SubMag_add << sh_add;
+				NormExt_add = SubMag_add << sh_add;
 
-					if (Ae_add > sh_add) begin
-						Eres_add = Ae_add - sh_add;
-					end else begin
-						Eres_add = 5'd0;
+				if (Ae_add > sh_add)
+					Eres_add = Ae_add - sh_add;
+				else
+					Eres_add = 5'd0;
+
+				Mant_add    = NormExt_add[13:3];
+				guard_add   = NormExt_add[2];
+				roundb_add  = NormExt_add[1];
+				sticky2_add = NormExt_add[0];
+
+				sticky_all_add = sticky_add | sticky2_add;
+				NX_add = guard_add | roundb_add | sticky_all_add;
+
+				Mant12_add = {1'b0, Mant_add};
+				lsb_sub    = Mant_add[0];
+
+				unique case (roundmode)
+					2'b00: begin
+						// round toward zero
+						inc_sub = 1'b0;
 					end
-					
-					Mant_add = NormExt_add[13:3];
-					guard_add = NormExt_add[2];
-					roundb_add = NormExt_add[1];
-					sticky2_add = NormExt_add[0];
-
-					sticky_all_add = sticky_add | sticky2_add;
-					NX_add = guard_add | roundb_add | sticky_all_add;
-
-					Mant12_add = {1'b0, Mant_add};
-					lsb_sub = Mant_add[0];
-
-					unique case (roundmode)
-						2'b00: begin
-							//Round toward zero
-							inc_sub = 1'b0;
-						end
-						2'b01: begin
-							//round nearest even (RNE)
-							inc_sub = guard_add && (roundb_add|sticky_all_add|lsb_sub);
-						end
-						2'b10: begin
-							//round to +inf
-							inc_sub = (~signA_add) & NX_add;
-						end
-						2'b11: begin
-							//round to -inf
-							inc_sub = signA_add & NX_add;
-						end
-					endcase	
-					
-					if	(inc_sub) begin
-						Mant12_add = Mant12_add + 12'd1;
+					2'b01: begin
+						// RNE
+						inc_sub = guard_add && (roundb_add | sticky_all_add | lsb_sub);
 					end
-
-					if (Mant12_add[11]) begin
-						MantFinal_add = Mant12_add[11:1];
-						Efinal_add = Eres_add + 5'd1;
-					end else begin
-						MantFinal_add = Mant12_add[10:0];
-						Efinal_add = Eres_add;
+					2'b10: begin
+						// round to +inf
+						inc_sub = (~signA_add) & NX_add;
 					end
+					2'b11: begin
+						// round to -inf
+						inc_sub = signA_add & NX_add;
+					end
+				endcase
 
-					p_add = {signA_add, Efinal_add, MantFinal_add[9:0]};
+				if (inc_sub) begin
+					Mant12_add = Mant12_add + 12'd1;
+				end
+
+				if (Mant12_add[11]) begin
+					MantFinal_add = Mant12_add[11:1];
+					Efinal_add    = Eres_add + 5'd1;
+				end else begin
+					MantFinal_add = Mant12_add[10:0];
+					Efinal_add    = Eres_add;
+				end
+
+				p_add = {signA_add, Efinal_add, MantFinal_add[9:0]};
 			end
 		end
-	end
-end
+	end // if (add)
+end // always_comb
 
 //=====top level select=====
 
@@ -484,7 +547,7 @@ always_comb begin
 	end else if (mul) begin
 		//mul only
 		p = p_mul;
-		flags_next = 4'b0000;
+		flags_next = {3'b000, NX_mul};
 	end else if (add) begin
 		//add only
 		p=p_add;
@@ -495,16 +558,5 @@ always_comb begin
 	flags = flags_next;
 end
 
-
-   // stubbed ideas for instantiation ideas
-   
-   // fmaexpadd expadd(.Xe, .Ye, .XZero, .YZero, .Pe);
-   // fmamult mult(.Xm, .Ym, .Pm);
-   // fmasign sign(.OpCtrl, .Xs, .Ys, .Zs, .Ps, .As, .InvA);
-   // fmaalign align(.Ze, .Zm, .XZero, .YZero, .ZZero, .Xe, .Ye, .Am, .ASticky, .KillProd);
-   // fmaadd add(.Am, .Pm, .Ze, .Pe, .Ps, .KillProd, .ASticky, .AmInv, .PmKilled, .InvA, .Sm, .Se, .Ss);
-   // fmalza lza (.A(AmInv), .Pm(PmKilled), .Cin(InvA & (~ASticky | KillProd)), .sub(InvA), .SCnt);
-
- 
 endmodule
 
