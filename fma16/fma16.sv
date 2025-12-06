@@ -82,6 +82,8 @@ module fma16 (x, y, z, mul, add, negr, negz,
    logic lsb_add, inc_add, lsb_sub, inc_sub, lsb_mul, inc_mul;
    logic inexact_add;
    logic [15:0] x_abs, y_abs, z_abs;
+   logic sticky_carry_add;
+	logic sticky_round_add;  // combined sticky for RNE
 
    logic rm_rz;   // round toward zero
    logic rm_rne;  // round to nearest, ties to even
@@ -383,53 +385,60 @@ module fma16 (x, y, z, mul, add, negr, negz,
          endcase
 
          // ========= Same-sign: addition path =========
-         if (signA_add == signB_add) begin
+		if (signA_add == signB_add) begin
             SumExt_add = {1'b0, Aext_add} + {1'b0, Baligned_add};
 
+            // Normalize; when there is a carry, we shift right and must
+            // fold the dropped bit (SumExt_add[0]) into sticky.
             if (SumExt_add[14]) begin
-               NormExt_add = SumExt_add[14:1]; // shift right
+               NormExt_add = SumExt_add[14:1];   // (SumExt_add >> 1)[13:0]
                Eres_add    = Ae_add + 5'd1;
             end else begin
                NormExt_add = SumExt_add[13:0];
                Eres_add    = Ae_add;
             end
 
-            Mant_add    = NormExt_add[13:3]; // 11 bits = 1 + 10 frac
-			guard_add   = NormExt_add[2];
-			roundb_add  = NormExt_add[1];
-			sticky2_add = NormExt_add[0]; // already includes aligned sticky via Baligned[0]
+            Mant_add   = NormExt_add[13:3]; // 11 bits = 1 + 10 frac
+            guard_add  = NormExt_add[2];
+            roundb_add = NormExt_add[1];
 
-			// For the NX flag, *any* discarded bit counts:
-			NX_add = guard_add | roundb_add | sticky_add | sticky2_add;
+            // Sticky bit below guard:
+            //  - if no carry, just the lowest bit of NormExt
+            //  - if carry, also OR in SumExt_add[0], the bit lost by the shift
+            if (SumExt_add[14])
+               sticky2_add = NormExt_add[0] | SumExt_add[0];
+            else
+               sticky2_add = NormExt_add[0];
 
-			Mant12_add = {1'b0, Mant_add};
-			lsb_add    = Mant_add[0];
+            // Inexact if any bit below the LSB we keep is nonzero
+            NX_add = guard_add | roundb_add | sticky2_add;
 
-			// Rounding increment (same-sign add)
-			inc_add = 1'b0;
+            Mant12_add = {1'b0, Mant_add};
+            lsb_add    = Mant_add[0];
 
-			if (rm_rz) begin
-				// round toward zero: truncate
-				inc_add = 1'b0;
+            // Rounding increment (same-sign add)
+            inc_add = 1'b0;
 
-			end else if (rm_rne) begin
-				// RNE: guard && (roundb | sticky2 | lsb)
-				// NOTE: use sticky2_add only, NOT sticky_add,
-				// because sticky_add is already folded into NormExt_add.
-				inc_add = guard_add && (roundb_add | sticky2_add | lsb_add);
+            if (rm_rz) begin
+               // round toward zero
+               inc_add = 1'b0;
 
-			end else if (rm_rp) begin
-				// round to +inf
-				inc_add = (~signA_add) & NX_add;
+            end else if (rm_rne) begin
+               // RNE: guard && (roundb | sticky2 | lsb_add)
+               // sticky2_add now already includes the dropped carry bit when needed
+               inc_add = guard_add && (roundb_add | sticky2_add | lsb_add);
 
-			end else begin
-				// round to -inf
-				inc_add =  signA_add & NX_add;
-			end
+            end else if (rm_rp) begin
+               // round to +inf
+               inc_add = (~signA_add) & NX_add;
 
-            if (inc_add) begin
-               Mant12_add = Mant12_add + 12'd1;
+            end else begin
+               // round to -inf
+               inc_add =  signA_add & NX_add;
             end
+
+            if (inc_add)
+               Mant12_add = Mant12_add + 12'd1;
 
             if (Mant12_add[11]) begin
                MantFinal_add = Mant12_add[11:1];
@@ -479,7 +488,7 @@ module fma16 (x, y, z, mul, add, negr, negz,
 				sticky2_add = NormExt_add[0];
 
 				// For NX, again, any discarded bit counts:
-				NX_add = guard_add | roundb_add | sticky_add | sticky2_add;
+				NX_add = guard_add | roundb_add | sticky2_add;
 
 				Mant12_add = {1'b0, Mant_add};
 				lsb_sub    = Mant_add[0];
