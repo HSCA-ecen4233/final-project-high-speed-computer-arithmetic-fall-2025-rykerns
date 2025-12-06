@@ -44,10 +44,10 @@ module fma16 (x, y, z, mul, add, negr, negz,
    logic [21:0] Pm; //product of significands
    logic Ps; // product sign
 
-   localparam int BIAS = 15;
-   int exptemp; //signed intermediary exponent
-   logic [6:0] exp_sum; //exponent sum
-   logic [6:0] exp_norm; //exponent normalized
+   localparam logic signed [6:0] BIAS = 7'd15;
+   logic signed [6:0] exptemp; //signed intermediary exponent
+   logic signed[6:0] exp_sum; //exponent sum
+   logic signed [6:0] exp_norm; //exponent normalized
    logic [4:0] Re; //final exponent
 
    logic [10:0] Rm; //normalized significand
@@ -72,7 +72,7 @@ module fma16 (x, y, z, mul, add, negr, negz,
    logic signA_add, signB_add;
    logic [14:0] DiffExt_add;
    logic [13:0] SubMag_add;
-   logic [3:0] sh_add;
+   logic [4:0] sh_add;
    logic signX_eff, signZ_eff;
    logic [4:0] Xexp_add;
    logic [9:0] Xfrac_add;
@@ -129,51 +129,53 @@ module fma16 (x, y, z, mul, add, negr, negz,
    //fma_1: still getting 3 odd off-by-1 errors that i cant seem to get rid of so im going to skip it for now and come back to it
 
    always_comb begin
-      // Signed exponent sum
-      exptemp = Xe + Ye - BIAS;
+      // Signed exponent sum (7-bit)
+      exptemp = $signed({2'b00, Xe}) + $signed({2'b00, Ye}) - BIAS;
 
       if (Pm == 22'd0) begin
          // exact zero product
-         Rm = 11'd0;
-         exp_norm= 7'd0;
+         Rm        = 11'd0;
+         exp_norm  = 7'sd0;
          guard_mul = 1'b0;
          round_mul = 1'b0;
-         sticky_mul = 1'b0;
+         sticky_mul= 1'b0;
+
       end else if (Pm[21]) begin
          // product mantissa in [2,4) -> normalize with +1 to exponent
-         if (exptemp + 1 < 0) begin
+         if (exptemp + 7'sd1 < 7'sd0) begin
             // underflow after normalization
-            Rm = 11'd0;
-            exp_norm = 7'd0;
+            Rm        = 11'd0;
+            exp_norm  = 7'sd0;
             guard_mul = 1'b0;
             round_mul = 1'b0;
-            sticky_mul = (Pm != 22'd0);
+            sticky_mul= (Pm != 22'd0);
          end else begin
             // keep top 11 bits as mantissa
-            Rm = Pm[21:11]; // 1.xxxxx xxxxx (11 bits)
-            exp_norm = exptemp + 1;
+            Rm        = Pm[21:11];
+            exp_norm  = exptemp + 7'sd1;
 
             // GRS from lower bits of Pm
             guard_mul = Pm[10];
             round_mul = Pm[9];
-            sticky_mul = |Pm[8:0];
+            sticky_mul= |Pm[8:0];
          end
+
       end else begin
          // product mantissa in [1,2)
-         if (exptemp < 0) begin
+         if (exptemp < 7'sd0) begin
             // underflow
-            Rm = 11'd0;
-            exp_norm = 7'd0;
+            Rm        = 11'd0;
+            exp_norm  = 7'sd0;
             guard_mul = 1'b0;
             round_mul = 1'b0;
-            sticky_mul = (Pm != 22'd0);
+            sticky_mul= (Pm != 22'd0);
          end else begin
-            Rm = Pm[20:10];
-            exp_norm = exptemp;
+            Rm        = Pm[20:10];
+            exp_norm  = exptemp;
 
             guard_mul = Pm[9];
             round_mul = Pm[8];
-            sticky_mul = |Pm[7:0];
+            sticky_mul= |Pm[7:0];
          end
       end
    end
@@ -196,7 +198,7 @@ module fma16 (x, y, z, mul, add, negr, negz,
       NX_mul = guard_mul | round_mul | sticky_mul;
 
       Mant12_mul = {1'b0, Rm};     // 1 + 10 frac bits -> 12 bits
-      lsb_mul    = Rm[0];
+      lsb_mul = Rm[0];
 
       // Rounding increment for mul
       inc_mul = 1'b0;
@@ -224,10 +226,10 @@ module fma16 (x, y, z, mul, add, negr, negz,
       // possible carry out
       if (Mant12_mul[11]) begin
          MantFinal_mul = Mant12_mul[11:1];
-         Efinal_mul    = Re + 5'd1;
+         Efinal_mul = Re + 5'd1;
       end else begin
          MantFinal_mul = Mant12_mul[10:0];
-         Efinal_mul    = Re;
+         Efinal_mul = Re;
       end
    end
 
@@ -240,26 +242,61 @@ module fma16 (x, y, z, mul, add, negr, negz,
 
    logic tiny_prod_fma;
 
-   always_comb begin
-      // reuse exptemp and Pm
+    always_comb begin
       tiny_prod_fma = 1'b0;
       if (mul && add && (Pm != 22'd0)) begin
          if (Pm[21]) begin
-            tiny_prod_fma = (exptemp + 1 < 0);
+            tiny_prod_fma = (exptemp + 7'sd1 < 7'sd0);
          end else begin
-            tiny_prod_fma = (exptemp < 0);
+            tiny_prod_fma = (exptemp < 7'sd0);
          end
       end
    end
 
-   logic [10:0] Rm_fma;
-   logic g_fma, r_fma, s_fma;
-   logic [21:0] Ptmp;
-
    always_comb begin
-      // Defaults
-      p_add  = x;     // pass-through if not doing add
-      NX_add = 1'b0;
+      // Defaults for everything driven in this block to fix lint latch errors
+		p_add = x;        // pass-through if not doing add
+		NX_add = 1'b0;
+
+		Xs_src = 1'b0;
+		Xexp_add = 5'd0;
+		Xfrac_add= 10'd0;
+		Xsig_src = 11'd0;
+		Xext_Base = 14'd0;
+		signX_eff = 1'b0;
+		signZ_eff = 1'b0;
+		Zext_Base = 14'd0;
+
+		Ae_add = 5'd0;
+		Aext_add = 14'd0;
+		Be_add = 5'd0;
+		Bext_add = 14'd0;
+		signA_add= 1'b0;
+		signB_add = 1'b0;
+
+		dexp_add = 5'd0;
+		Baligned_add= 14'd0;
+		sticky_add = 1'b0;
+
+		SumExt_add = 15'd0;
+		NormExt_add= 14'd0;
+		Eres_add = 5'd0;
+		Mant_add = 11'd0;
+		guard_add = 1'b0;
+		roundb_add = 1'b0;
+		sticky2_add= 1'b0;
+
+		Mant12_add = 12'd0;
+		lsb_add = 1'b0;
+		inc_add = 1'b0;
+		MantFinal_add = 11'd0;
+		Efinal_add = 5'd0;
+
+		DiffExt_add = 15'd0;
+		SubMag_add = 14'd0;
+		sh_add = 5'd0;
+		lsb_sub= 1'b0;
+		inc_sub = 1'b0;
 
       if (add) begin
          // ========= Choose X operand (product or original x) =========
