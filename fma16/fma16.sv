@@ -431,16 +431,26 @@ module fma16 (x, y, z, mul, add, negr, negz,
             Xs_src    = Xs;
             Xexp_add  = Xe;
             Xfrac_add = Xm;
-            Xsig_src  = {1'b1, Xm};
-            Xext_Base = {1'b1, Xm, 3'b000};
+
+            // For normals: hidden 1; for exp=0 (zero/subnormal): treat as 0
+            if (Xe != 5'd0) begin
+               Xsig_src  = {1'b1, Xm};
+               Xext_Base = {1'b1, Xm, 3'b000};
+            end else begin
+               Xsig_src  = 11'd0;
+               Xext_Base = 14'd0;
+            end
          end
 
          // ========= Effective signs after optional negations =========
          signX_eff = Xs_src ^ negr;
          signZ_eff = Zs    ^ negz;
 
-         // Z mantissa extended with 3 low zeros
-         Zext_Base = {1'b1, Zm, 3'b000};
+         // Z mantissa extended with 3 low zeros; zero/denorm → 0
+         if (Ze != 5'd0)
+            Zext_Base = {1'b1, Zm, 3'b000};
+         else
+            Zext_Base = 14'd0;
 
          // ========= Exponent compare: choose A (larger) and B (smaller) =========
          if ((Xexp_add > Ze) || ((Xexp_add == Ze) && (Xfrac_add >= Zm))) begin
